@@ -21,6 +21,8 @@
     <link href="{{ asset('admin/plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('admin/plugins/perfectscroll/perfect-scrollbar.css') }}" rel="stylesheet">
     <link href="{{ asset('admin/plugins/pace/pace.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/plugins/highlight/styles/github-gist.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/plugins/datatables/datatables.min.css') }}" rel="stylesheet">
 
 
     <!-- Theme Styles -->
@@ -125,5 +127,10 @@
 <script src="{{ asset('admin/js/main.min.js') }}"></script>
 <script src="{{ asset('admin/js/custom.js') }}"></script>
 <script src="{{ asset('admin/js/pages/dashboard.js') }}"></script>
+<script src="{{ asset('admin/plugins/highlight/highlight.pack.js') }}"></script>
+<script src="{{ asset('admin/plugins/datatables/datatables.min.js') }}"></script>
+<script src="{{ asset('admin/js/pages/datatables.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@stack('script')
 </body>
 </html>
