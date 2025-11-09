@@ -1,0 +1,179 @@
+<!-- meta tags and other links -->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+@include("partials.dashboard.head")
+
+<body>
+
+    @include("partials.dashboard.sidebar")
+
+    <main class="dashboard-main">
+        @include("partials.dashboard.navbar")
+
+        <div class="dashboard-main-body">
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+                <h6 class="fw-semibold mb-0">Tambah Data Customer</h6>
+                <ul class="d-flex align-items-center gap-2">
+                    <li class="fw-medium">
+                        <a href="{{ route("dashboard.admin") }}"
+                            class="d-flex align-items-center gap-1 hover-text-primary">
+                            <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>-</li>
+                    <li class="fw-medium">
+                        <a href="{{ route("customer.index") }}"
+                            class="d-flex align-items-center gap-1 hover-text-primary">
+                            Data Customer
+                        </a>
+                    </li>
+                    <li>-</li>
+                    <li class="fw-medium">Tambah</li>
+                </ul>
+            </div>
+
+            <div class="card h-100 p-0 radius-12">
+                <div class="card-header border-bottom bg-base py-16 px-24">
+                    <h6 class="text-lg fw-semibold mb-0">Form Tambah Customer</h6>
+                </div>
+                <div class="card-body p-24">
+                    <form action="{{ route("customer.store") }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="nama"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Nama Lengkap <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="text"
+                                        class="form-control radius-8 @error("nama") is-invalid @enderror" id="nama"
+                                        name="nama" value="{{ old("nama") }}" placeholder="Masukkan nama lengkap">
+                                    @error("nama")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="username"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Username <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="text"
+                                        class="form-control radius-8 @error("username") is-invalid @enderror"
+                                        id="username" name="username" value="{{ old("username") }}"
+                                        placeholder="Masukkan username">
+                                    @error("username")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="email"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Email <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="email"
+                                        class="form-control radius-8 @error("email") is-invalid @enderror"
+                                        id="email" name="email" value="{{ old("email") }}"
+                                        placeholder="Masukkan email">
+                                    @error("email")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="no_hp"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        No HP <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="text"
+                                        class="form-control radius-8 @error("no_hp") is-invalid @enderror"
+                                        id="no_hp" name="no_hp" value="{{ old("no_hp") }}"
+                                        placeholder="Masukkan nomor HP">
+                                    @error("no_hp")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="password"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Password <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="password"
+                                        class="form-control radius-8 @error("password") is-invalid @enderror"
+                                        id="password" name="password" placeholder="Masukkan password">
+                                    @error("password")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-20">
+                                    <label for="password_confirmation"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Konfirmasi Password <span class="text-danger-600">*</span>
+                                    </label>
+                                    <input type="password" class="form-control radius-8" id="password_confirmation"
+                                        name="password_confirmation" placeholder="Konfirmasi password">
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="mb-20">
+                                    <label for="alamat"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Alamat
+                                    </label>
+                                    <textarea class="form-control radius-8 @error("alamat") is-invalid @enderror" id="alamat" name="alamat"
+                                        rows="3" placeholder="Masukkan alamat">{{ old("alamat") }}</textarea>
+                                    @error("alamat")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="mb-20">
+                                    <label for="foto"
+                                        class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                        Foto Profil
+                                    </label>
+                                    <input type="file"
+                                        class="form-control radius-8 @error("foto") is-invalid @enderror"
+                                        id="foto" name="foto" accept="image/*">
+                                    @error("foto")
+                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-secondary-light">Format: JPG, JPEG, PNG. Max: 2MB</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                            <a href="{{ route("customer.index") }}"
+                                class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8">
+                                Batal
+                            </a>
+                            <button type="submit"
+                                class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
+                                Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        @include("partials.dashboard.footer")
+    </main>
+    @include("partials.dashboard.scripts")
+</body>
+
+</html>
