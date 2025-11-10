@@ -130,6 +130,7 @@
 <script src="{{ asset('admin/plugins/highlight/highlight.pack.js') }}"></script>
 <script src="{{ asset('admin/plugins/datatables/datatables.min.js') }}"></script>
 <script src="{{ asset('admin/js/pages/datatables.js') }}"></script>
+<script src="{{ asset('admin/js/pages/widgets.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @stack('script')
 </body>

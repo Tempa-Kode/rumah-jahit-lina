@@ -149,7 +149,7 @@
     </div>
 
     <div class="header">
-        <h1>RIA AKSESORIS</h1>
+        <h1>Rumah Jahit Lina</h1>
         <p>Laporan Penjualan</p>
         <p>Periode: {{ date("d F Y", strtotime($tanggalAwal)) }} - {{ date("d F Y", strtotime($tanggalAkhir)) }}</p>
     </div>
@@ -171,7 +171,7 @@
             <p>Rupiah</p>
         </div>
     </div>
-    
+
     <div class="section-title">Detail Transaksi</div>
     @if ($transaksis->count() > 0)
         <table class="data-table">
@@ -210,7 +210,7 @@
 
     <div class="footer">
         <p>Dicetak pada: {{ date("d F Y H:i:s") }}</p>
-        <p>&copy; {{ date("Y") }} Ria Aksesoris. All rights reserved.</p>
+        <p>&copy; {{ date("Y") }} Rumah Jahit Lina. All rights reserved.</p>
     </div>
 </body>
 
