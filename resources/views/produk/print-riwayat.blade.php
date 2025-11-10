@@ -170,7 +170,7 @@
     </div>
 
     <div class="header">
-        <h1>RIA AKSESORIS</h1>
+        <h1>Rumah Jahit Ria</h1>
         <p>Riwayat Stok Produk</p>
         <p>Tanggal Cetak: {{ date("d F Y H:i:s") }}</p>
     </div>
@@ -199,7 +199,7 @@
     <div class="summary-boxes">
         <div class="summary-box">
             <p>Stok Produk Utama</p>
-            <h3>{{ $produk->jumlah_produk }}</h3>
+            <h3>{{ $produk->jumlah_produk ?? 0 }}</h3>
             <p>Unit</p>
         </div>
         <div class="summary-box">
@@ -274,7 +274,7 @@
 
     <div class="footer">
         <p>Dicetak pada: {{ date("d F Y H:i:s") }}</p>
-        <p>&copy; {{ date("Y") }} Ria Aksesoris. All rights reserved.</p>
+        <p>&copy; {{ date("Y") }} Rumah Jahit Ria. All rights reserved.</p>
     </div>
 </body>
 
