@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset("home/css/photoswipe.css") }}">
     <link rel="stylesheet" href="{{ asset("home/css/swiper-bundle.min.css") }}">
     <link rel="stylesheet" href="{{ asset("home/css/animate.css") }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset("home/css/styles.css") }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset("home/css/app.css") }}">
     <link rel="stylesheet" type="text/css" href="{{ asset("home/css/filter-custom.css") }}">
     <link rel="stylesheet" type="text/css" href="{{ asset("home/css/cart-custom.css") }}">
 
