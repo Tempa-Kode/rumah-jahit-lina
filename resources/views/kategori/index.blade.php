@@ -1,4 +1,4 @@
-@extends('template')
+@extends('template-dashboard')
 @section('title', 'Data Kategori')
 @section('main')
     <div class="container-fluid">
