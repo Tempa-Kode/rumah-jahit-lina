@@ -45,7 +45,7 @@
         <div class="logo">
             <a href="{{ route('dashboard.admin') }}" class="logo-icon"><span class="logo-text">Dashboard</span></a>
             <div class="sidebar-user-switcher user-activity-online">
-                <a href="#">
+                <a href="{{ route("profile.index") }}">
                     <img src="{{ asset(Auth::user()->foto ?? 'admin/images/avatars/avatar.png') }}">
                     <span class="activity-indicator"></span>
                     <span class="user-info-text">{{ Auth::user()->nama }}<br><span class="user-state-info">Online</span></span>
@@ -86,6 +86,15 @@
                         <a href="{{ route("customer.index") }}" class="{{ request()->routeIs("customer.*") ? "active" : "" }}"><i class="material-icons-two-tone">account_box</i>Data Customer</a>
                     </li>
                 @endif
+                <li>
+                    <form action="{{ route('logout') }}" method="post" class="w-100 p-3">
+                        @csrf
+                        @method('POST')
+                        <button class="btn btn-danger w-100">
+                            Logout
+                        </button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
