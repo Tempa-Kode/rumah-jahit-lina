@@ -212,6 +212,7 @@
     <script type="module" src="{{ asset("home/js/zoom.js") }}"></script>
     <script src="{{ asset("home/js/cart.js") }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @stack("scripts")
     <script>

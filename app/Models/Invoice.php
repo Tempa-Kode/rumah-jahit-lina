@@ -24,7 +24,6 @@ class Invoice extends Model
         'status_pembayaran',
         'status_pengiriman',
         'resi',
-        'bukti_pembayaran',
     ];
 
     protected $casts = [

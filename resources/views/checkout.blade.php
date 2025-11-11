@@ -93,41 +93,6 @@
                     <div class="wrap">
                         <h5 class="title fw-semibold">Metode Pembayaran</h5>
                         <div class="form-payment">
-                            <div class="payment-box" id="payment-box">
-                                <div class="payment-item payment-choose-card active">
-                                    <label for="bank-transfer-method" class="payment-header" data-bs-toggle="collapse"
-                                        data-bs-target="#bank-transfer-payment" aria-controls="bank-transfer-payment"
-                                        aria-expanded="true">
-                                        <input type="radio" name="payment-method" class="d-none tf-check-rounded"
-                                            id="bank-transfer-method" checked="">
-                                        <p class="select-payment">
-                                            Trasnfer Bank / QRIS
-                                        </p>
-                                    </label>
-                                    <div id="bank-transfer-payment" class="collapse show" data-bs-parent="#payment-box">
-                                        <div class="payment-body">
-                                            <div class="alert alert-warning mb-3">
-                                                <p class="mb-2 body-text-3"><strong>Transfer ke:</strong></p>
-                                                <p class="mb-1 body-text-4">Bank BRI: 5322 0101 5797 536</p>
-                                                <p class="mb-2 body-text-4">a.n. Riahma Uli Br Saragih</p>
-                                                <p class="mb-2 body-text-4 mt-2">Atau <strong>scan QRIS</strong> berikut:
-                                                </p>
-                                                <img src="{{ asset("home/images/qris.jpg") }}" alt="qris"
-                                                    class="w-50">
-                                                <p class="mb-0 caption text-main-2">
-                                                    Silakan transfer sesuai total pembayaran dan upload bukti transfer.
-                                                </p>
-                                            </div>
-                                            <fieldset>
-                                                <label>Upload Bukti Transfer <span class="text-danger">*</span></label>
-                                                <input type="file" name="bukti_transfer" id="bukti_transfer"
-                                                    accept="image/*" class="def form-control" required>
-                                                <p class="caption text-main-2 mt-1">Format: JPG, PNG, JPEG (Max: 2MB)</p>
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="box-btn">
                                 <button type="button" id="btn-place-order" class="tf-btn w-100">
                                     <span class="text-white">Buat Pesanan</span>
@@ -220,27 +185,6 @@
                     return;
                 }
 
-                // Check payment method
-                const paymentMethod = document.querySelector('input[name="payment-method"]:checked');
-                const buktiTransferInput = document.getElementById('bukti_transfer');
-
-                // Validate bukti transfer if bank transfer is selected
-                if (paymentMethod && paymentMethod.id === 'bank-transfer-method') {
-                    if (!buktiTransferInput.files || buktiTransferInput.files.length === 0) {
-                        alert('Silakan upload bukti transfer!');
-                        buktiTransferInput.focus();
-                        return;
-                    }
-
-                    // Validate file size (max 2MB)
-                    const file = buktiTransferInput.files[0];
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran file maksimal 2MB!');
-                        buktiTransferInput.value = '';
-                        return;
-                    }
-                }
-
                 // Get cart from localStorage
                 const cartData = localStorage.getItem('ria_shopping_cart');
                 const cart = cartData ? JSON.parse(cartData) : [];
@@ -257,11 +201,6 @@
                 // Prepare FormData with file upload
                 const formData = new FormData(form);
                 formData.append('cart_data', JSON.stringify(cart));
-
-                // Add bukti transfer if exists
-                if (buktiTransferInput.files && buktiTransferInput.files.length > 0) {
-                    formData.append('bukti_transfer', buktiTransferInput.files[0]);
-                }
 
                 // Send to server
                 fetch('{{ route("checkout.process") }}', {
@@ -299,18 +238,6 @@
                         this.disabled = false;
                         this.innerHTML = '<span class="text-white">Buat Pesanan</span>';
                     });
-            });
-
-            // Toggle bukti transfer required based on payment method
-            document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const buktiTransferInput = document.getElementById('bukti_transfer');
-                    if (this.id === 'bank-transfer-method') {
-                        buktiTransferInput.setAttribute('required', 'required');
-                    } else {
-                        buktiTransferInput.removeAttribute('required');
-                    }
-                });
             });
 
             // Initial render - wait for DOM

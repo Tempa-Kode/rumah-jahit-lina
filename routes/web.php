@@ -76,3 +76,8 @@ Route::middleware('auth')->group(function () {
 // RajaOngkir Routes
 Route::get('/rajaongkir/districts', [App\Http\Controllers\CartController::class, 'getDistricts'])->name('rajaongkir.districts');
 Route::post('/rajaongkir/cost', [App\Http\Controllers\CartController::class, 'calculateShippingCost'])->name('rajaongkir.cost');
+
+Route::prefix('pembayaran')->group(function () {
+    Route::post('/', [\App\Http\Controllers\PembayaranController::class, 'bayar'])->name('pembayaran.bayar');
+    Route::put('/cek-status', [\App\Http\Controllers\PembayaranController::class, 'updateStatus'])->name('pembayaran.cek-status');
+});

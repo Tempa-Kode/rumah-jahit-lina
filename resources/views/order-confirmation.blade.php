@@ -82,7 +82,7 @@
                         </svg>
                     </div>
                     <h3 class="fw-semibold mb-2">Pesanan Berhasil Dibuat!</h3>
-                    <p class="text-secondary">Terima kasih atas pesanan Anda</p>
+                    <p class="text-primary">Terima kasih atas pesanan Anda</p>
                     <div class="alert alert-success d-inline-block mt-3">
                         <strong>Kode Invoice:</strong> {{ $invoice->kode_invoice }}
                     </div>
@@ -107,6 +107,14 @@
                                         <td><strong>Alamat:</strong></td>
                                         <td>{{ $invoice->alamat }}</td>
                                     </tr>
+                                    <tr>
+                                        <td><strong>Ongkir:</strong></td>
+                                        <td>Rp. {{ number_format(num: $invoice->ongkir, decimals: 0, decimal_separator: '.', thousands_separator: '.') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Layanan Kurir:</strong></td>
+                                        <td>{{ $invoice->kurir }}</td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
@@ -124,9 +132,9 @@
                                         <td><strong>Status Pembayaran:</strong></td>
                                         <td>
                                             @if ($invoice->status_pembayaran == "pending")
-                                                <span class="badge bg-warning text-dark">Menunggu Konfirmasi     Pembayaran</span>
+                                                <span class="badge bg-warning text-dark">Belum Bayar</span>
                                             @elseif($invoice->status_pembayaran == "terima")
-                                                <span class="badge bg-success">Terbayar</span>
+                                                <span class="badge bg-success">Lunas</span>
                                             @else
                                                 <span class="badge bg-danger">Ditolak</span>
                                             @endif
@@ -207,52 +215,62 @@
                 </div>
 
                 <!-- Payment Instructions -->
-                @if ($invoice->status_pembayaran == "pending")
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Pembayaran</h5>
+{{--                @if ($invoice->status_pembayaran == "pending")--}}
+{{--                    <div class="card mb-4">--}}
+{{--                        <div class="card-body">--}}
+{{--                            <h5 class="card-title mb-3">Pembayaran</h5>--}}
 
-                            <!-- Upload Payment Proof -->
-                            @if (!$invoice->bukti_pembayaran)
-                                <h6 class="mt-4 mb-3">Upload Bukti Pembayaran</h6>
-                                <form action="{{ route("order.payment.proof", $invoice->id) }}" method="POST"
-                                    enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <input type="file" name="bukti_pembayaran" class="form-control"
-                                            accept="image/*" required>
-                                        <small class="text-muted">Format: JPG, PNG. Maks 2MB</small>
-                                    </div>
-                                    <button type="submit" class="tf-btn">
-                                        <span class="text-white">Upload Bukti Transfer</span>
-                                    </button>
-                                </form>
-                            @else
-                                <div class="alert alert-success mt-3">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="icon-check me-2"></i>
-                                        <strong>Bukti pembayaran sudah diunggah. Menunggu verifikasi admin.</strong>
-                                    </div>
-                                    <div class="mt-3">
-                                        <p class="mb-2"><strong>Preview Bukti Transfer:</strong></p>
-                                        <img src="{{ asset($invoice->bukti_pembayaran) }}" alt="Bukti Pembayaran"
-                                            class="img-thumbnail" style="max-width: 300px; cursor: pointer;"
-                                            onclick="window.open('{{ asset($invoice->bukti_pembayaran) }}', '_blank')">
-                                        <p class="small text-muted mt-2">Klik gambar untuk melihat ukuran penuh</p>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
+{{--                            <!-- Upload Payment Proof -->--}}
+{{--                            @if (!$invoice->bukti_pembayaran)--}}
+{{--                                <h6 class="mt-4 mb-3">Upload Bukti Pembayaran</h6>--}}
+{{--                                <form action="{{ route("order.payment.proof", $invoice->id) }}" method="POST"--}}
+{{--                                    enctype="multipart/form-data">--}}
+{{--                                    @csrf--}}
+{{--                                    <div class="mb-3">--}}
+{{--                                        <input type="file" name="bukti_pembayaran" class="form-control"--}}
+{{--                                            accept="image/*" required>--}}
+{{--                                        <small class="text-muted">Format: JPG, PNG. Maks 2MB</small>--}}
+{{--                                    </div>--}}
+{{--                                    <button type="submit" class="tf-btn">--}}
+{{--                                        <span class="text-white">Upload Bukti Transfer</span>--}}
+{{--                                    </button>--}}
+{{--                                </form>--}}
+{{--                            @else--}}
+{{--                                <div class="alert alert-success mt-3">--}}
+{{--                                    <div class="d-flex align-items-center mb-2">--}}
+{{--                                        <i class="icon-check me-2"></i>--}}
+{{--                                        <strong>Bukti pembayaran sudah diunggah. Menunggu verifikasi admin.</strong>--}}
+{{--                                    </div>--}}
+{{--                                    <div class="mt-3">--}}
+{{--                                        <p class="mb-2"><strong>Preview Bukti Transfer:</strong></p>--}}
+{{--                                        <img src="{{ asset($invoice->bukti_pembayaran) }}" alt="Bukti Pembayaran"--}}
+{{--                                            class="img-thumbnail" style="max-width: 300px; cursor: pointer;"--}}
+{{--                                            onclick="window.open('{{ asset($invoice->bukti_pembayaran) }}', '_blank')">--}}
+{{--                                        <p class="small text-muted mt-2">Klik gambar untuk melihat ukuran penuh</p>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            @endif--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                @endif--}}
 
                 <!-- Action Buttons -->
-                <div class="text-center">
-                    <a href="{{ route("home") }}" class="tf-btn btn-gray me-2">
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{{ route("home") }}" class="tf-btn btn-gray w-25">
                         <span class="text-white">Kembali ke Beranda</span>
                     </a>
+                    @if ($invoice->status_pembayaran == "pending")
+                        <button
+                            class="btn btn-success"
+                            id="bayar"
+                            data-id-invoice="{{ $invoice->id_invoice }}"
+                            data-total-bayar="{{ $invoice->total_bayar }}"
+                        >
+                            Lakukan Pembayaran
+                        </button>
+                    @endif
                     @auth
-                        <a href="{{ route("akun.pesanan") }}" class="tf-btn">
+                        <a href="{{ route("akun.pesanan") }}" class="tf-btn w-25">
                             <span class="text-white">Lihat Pesanan Saya</span>
                         </a>
                     @endauth
@@ -262,3 +280,133 @@
     </section>
     <!-- /Order Confirmation -->
 @endsection
+
+@push('scripts')
+    <script type="text/javascript"
+            src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="{{ config('services.midtrans.clientKey') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Set environment untuk sandbox
+            if (typeof snap !== 'undefined') {
+                snap.environment = 'sandbox';
+            }
+
+            $('#bayar').on('click', function () {
+                const payButton = $(this);
+                const id_invoice = payButton.data('id-invoice');
+                const total_bayar = payButton.data('total-bayar');
+
+                payButton.prop('disabled', true).text('Memproses...');
+
+                $.ajax({
+                    url: '{{ route("pembayaran.bayar") }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id_invoice: id_invoice,
+                        total_bayar: total_bayar
+                    },
+                    success: function(response) {
+                        if (!response.snap_token) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Gagal mendapatkan token pembayaran. Silakan coba lagi.',
+                            });
+                            payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            return;
+                        }
+
+                        // Pastikan snap loaded sebelum digunakan
+                        if (typeof snap === 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Midtrans Snap belum termuat. Silakan refresh halaman.',
+                            });
+                            payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            return;
+                        }
+
+                        snap.pay(response.snap_token, {
+                            onSuccess: function(result){
+                                console.log('Success:', result);
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Pembayaran Berhasil!',
+                                    text: 'Terima kasih, pembayaran Anda telah kami terima.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    updateStatus(result.order_id);
+                                });
+                            },
+                            onPending: function(result){
+                                console.log('Pending:', result);
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Menunggu Pembayaran',
+                                    text: 'Selesaikan pembayaran Anda sesuai instruksi yang diberikan.',
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            onError: function(result){
+                                console.log('Error:', result);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Pembayaran Gagal',
+                                    text: 'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+                                });
+                                payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            },
+                            onClose: function(){
+                                console.log('Popup ditutup oleh pengguna.');
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Dibatalkan',
+                                    text: 'Anda menutup jendela pembayaran sebelum selesai.'
+                                });
+                                payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Gagal',
+                            text: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'
+                        });
+                        payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                    }
+                });
+
+                function updateStatus($order_id){
+                    console.log($order_id)
+                    $.ajax({
+                        url: '{{ route("pembayaran.cek-status") }}',
+                        method: 'PUT',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            _method: 'PUT',
+                            kode_invoice : $order_id
+                        },
+                        success: function(response) {
+                            window.location.href = '{{ route("akun.pesanan") }}';
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Gagal memperbarui status pembayaran. Silakan hubungi admin.'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+@endpush

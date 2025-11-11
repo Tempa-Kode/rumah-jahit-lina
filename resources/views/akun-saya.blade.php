@@ -32,15 +32,15 @@
                             <h3 class="fw-semibold mb-20">Halo {{ Auth::user()->nama ?? "Pengguna" }}</h3>
                             <p>
                                 Dari dashboard akun Anda, Anda dapat melihat
-                                <a class="text-secondary link fw-medium" href="{{ route("akun.pesanan") }}">
+                                <a class="text-dark link fw-medium" href="{{ route("akun.pesanan") }}">
                                     pesanan terbaru
                                 </a>
                                 , mengelola
-                                <a class="text-secondary link fw-medium" href="{{ route("akun.alamat") }}">
+                                <a class="text-dark link fw-medium" href="{{ route("akun.alamat") }}">
                                     alamat pengiriman dan pembayaran
                                 </a>
                                 , dan
-                                <a class="text-secondary link fw-medium" href="{{ route("akun.edit") }}">
+                                <a class="text-dark link fw-medium" href="{{ route("akun.edit") }}">
                                     mengedit kata sandi dan detail akun Anda
                                 </a>.
                             </p>
