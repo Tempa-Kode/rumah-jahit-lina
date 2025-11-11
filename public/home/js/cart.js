@@ -165,12 +165,12 @@ class ShoppingCart {
                             <div class="box-title">
                                 <a href="/produk/${
                                     item.id
-                                }" class="name-product body-md-2 fw-semibold text-secondary link">
+                                }" class="name-product body-md-2 fw-bold text-primary">
                                     ${item.nama}
                                 </a>
                                 ${
                                     item.jenis_nama
-                                        ? `<p class="body-text-3 text-secondary mb-1">${item.jenis_nama}</p>`
+                                        ? `<p class="new-price price-text fw-medium mb-1">${item.jenis_nama}</p>`
                                         : ""
                                 }
                                 <p class="price-wrap fw-medium">

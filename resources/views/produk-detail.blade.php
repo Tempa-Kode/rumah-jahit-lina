@@ -107,7 +107,7 @@
                                     <div class="infor-heading">
                                         <p class="caption">Kategori:
                                             <a href="{{ route("home", ["kategori" => $produk->kategori->id_kategori] + request()->except("kategori")) }}"
-                                                class="link text-secondary">
+                                                class="link text-primary">
                                                 {{ $produk->kategori->nama }}
                                             </a>
                                         </p>

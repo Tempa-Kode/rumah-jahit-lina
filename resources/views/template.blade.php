@@ -24,6 +24,9 @@
     <link rel="stylesheet" type="text/css" href="{{ asset("home/css/filter-custom.css") }}">
     <link rel="stylesheet" type="text/css" href="{{ asset("home/css/cart-custom.css") }}">
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
     <!-- Favicon and Touch Icons  -->
     <link rel="shortcut icon" href="{{ asset("home/images/logo/short-logo.svg") }}">
     <link rel="apple-touch-icon-precomposed" href="{{ asset("home/images/logo/short-logo.svg") }}">
@@ -32,64 +35,64 @@
 
 <body class="preload-wrapper popup-loader">
 
-<!-- Scroll Top -->
-<button id="goTop">
-    <span class="border-progress"></span>
-    <span class="icon icon-arrow-right"></span>
-</button>
+    <!-- Scroll Top -->
+    <button id="goTop">
+        <span class="border-progress"></span>
+        <span class="icon icon-arrow-right"></span>
+    </button>
 
-<!-- preload -->
-<div class="preload preload-container" id="preload">
-    <div class="preload-logo">
-        <div class="spinner"></div>
+    <!-- preload -->
+    <div class="preload preload-container" id="preload">
+        <div class="preload-logo">
+            <div class="spinner"></div>
+        </div>
     </div>
-</div>
-<!-- /preload -->
+    <!-- /preload -->
 
-<div id="wrapper">
-    <!-- Top Bar-->
+    <div id="wrapper">
+        <!-- Top Bar-->
 
-    <!-- /Top Bar -->
-    <!-- Header -->
-    <header class="tf-header">
-        <div class="inner-header line-bt">
-            <div class="container">
-                <div class="row">
-                    <div class=" col-lg-2 col-6 d-flex align-items-center">
-                        <div class="logo-site">
-                            <a href="{{ route("home") }}">
-                                {{-- <img src="{{ asset("home/images/logo/logo.svg") }}" alt="Logo"> --}}
-                                <h4 class="text-bold">Ria Aksesoris</h4>
-                            </a>
+        <!-- /Top Bar -->
+        <!-- Header -->
+        <header class="tf-header">
+            <div class="inner-header line-bt">
+                <div class="container">
+                    <div class="row">
+                        <div class=" col-lg-2 col-6 d-flex align-items-center">
+                            <div class="logo-site">
+                                <a href="{{ route("home") }}">
+                                    {{-- <img src="{{ asset("home/images/logo/logo.svg") }}" alt="Logo"> --}}
+                                    <h4 class="text-bold">RJ Lina</h4>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class=" col-lg-8 d-none d-lg-block">
-                        <div class="header-center">
-                            <form class="form-search-product m-auto" action="{{ route("home") }}" method="GET">
-                                <fieldset>
-                                    <input type="text" name="search" placeholder="Cari produk di sini"
-                                           value="{{ request("search") }}" autocomplete="off">
-                                </fieldset>
-                                <button type="submit" class="btn-submit-form">
-                                    <i class="icon-search"></i>
-                                </button>
-                            </form>
+                        <div class=" col-lg-8 d-none d-lg-block">
+                            <div class="header-center">
+                                <form class="form-search-product m-auto" action="{{ route("home") }}" method="GET">
+                                    <fieldset>
+                                        <input type="text" name="search" placeholder="Cari produk di sini"
+                                            value="{{ request("search") }}" autocomplete="off">
+                                    </fieldset>
+                                    <button type="submit" class="btn-submit-form">
+                                        <i class="icon-search"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                    </div>
-                    <div class=" col-lg-2 col-6 d-flex align-items-center justify-content-end">
-                        <div class="header-right">
-                            <ul class="nav-icon justify-content-xl-center">
-                                @auth
-                                    <li class="nav-account">
-                                        <a href="{{ route("akun.saya") }}" class="link nav-icon-item link-fill">
+                        <div class=" col-lg-2 col-6 d-flex align-items-center justify-content-end">
+                            <div class="header-right">
+                                <ul class="nav-icon justify-content-xl-center">
+                                    @auth
+                                        <li class="nav-account">
+                                            <a href="{{ route("akun.saya") }}" class="link nav-icon-item link-fill">
                                                 <span>
                                                     @if (Auth::user()->foto)
                                                         <img src="{{ asset(Auth::user()->foto) }}" alt="Foto Profil"
-                                                             class="rounded-circle"
-                                                             style="width: 26px; height: 26px; object-fit: cover; border: 1px solid #ddd;">
+                                                            class="rounded-circle"
+                                                            style="width: 26px; height: 26px; object-fit: cover; border: 1px solid #ddd;">
                                                     @else
                                                         <svg width="26" height="26" viewBox="0 0 22 23"
-                                                             fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <path
                                                                 d="M10.9998 11.5283C5.20222 11.5283 0.485352 16.2452 0.485352 22.0428C0.485352 22.2952 0.69017 22.5 0.942518 22.5C1.19487 22.5 1.39968 22.2952 1.39968 22.0428C1.39968 16.749 5.70606 12.4426 10.9999 12.4426C16.2937 12.4426 20.6001 16.749 20.6001 22.0428C20.6001 22.2952 20.8049 22.5 21.0572 22.5C21.3096 22.5 21.5144 22.2952 21.5144 22.0428C21.5144 16.2443 16.7975 11.5283 10.9998 11.5283Z"
                                                                 fill="#333E48" stroke="#333E48" stroke-width="0.3" />
@@ -99,17 +102,17 @@
                                                         </svg>
                                                     @endif
                                                 </span>
-                                            <p class="body-small">
-                                                Akun Saya
-                                            </p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-cart">
-                                        <a href="#shoppingCart" data-bs-toggle="offcanvas"
-                                           class="link link-fill nav-icon-item relative">
+                                                <p class="body-small">
+                                                    Akun Saya
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-cart">
+                                            <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                                class="link link-fill nav-icon-item relative">
                                                 <span>
-                                                    <svg width="26" height="26" viewBox="0 0 26 26" fill="none"
-                                                         xmlns="http://www.w3.org/2000/svg">
+                                                    <svg width="26" height="26" viewBox="0 0 26 26"
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M8.55865 19.1096C6.8483 19.1096 5.46191 20.496 5.46191 22.2064C5.46191 23.9165 6.8483 25.3029 8.55865 25.3029C10.2688 25.3029 11.6552 23.9165 11.6552 22.2064C11.6534 20.4969 10.2681 19.1114 8.55865 19.1096ZM8.55865 24.1644C7.47712 24.1644 6.60037 23.2877 6.60037 22.2064C6.60037 21.1248 7.47712 20.2481 8.55865 20.2481C9.63996 20.2481 10.5167 21.1248 10.5167 22.2064C10.5167 23.2877 9.63996 24.1644 8.55865 24.1644Z"
                                                             fill="#333E48" />
@@ -121,19 +124,19 @@
                                                             fill="#333E48" />
                                                     </svg>
                                                 </span>
-                                            <p class="body-small">
-                                                Keranjang
-                                            </p>
-                                        </a>
-                                    </li>
-                                @endauth
-                                @guest
-                                    <li class="nav-account">
-                                        <a href="#log" data-bs-toggle="modal"
-                                           class="link nav-icon-item link-fill">
+                                                <p class="body-small">
+                                                    Keranjang
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endauth
+                                    @guest
+                                        <li class="nav-account">
+                                            <a href="#log" data-bs-toggle="modal"
+                                                class="link nav-icon-item link-fill">
                                                 <span>
                                                     <svg width="26" height="26" viewBox="0 0 22 23"
-                                                         fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg">
                                                         <path
                                                             d="M10.9998 11.5283C5.20222 11.5283 0.485352 16.2452 0.485352 22.0428C0.485352 22.2952 0.69017 22.5 0.942518 22.5C1.19487 22.5 1.39968 22.2952 1.39968 22.0428C1.39968 16.749 5.70606 12.4426 10.9999 12.4426C16.2937 12.4426 20.6001 16.749 20.6001 22.0428C20.6001 22.2952 20.8049 22.5 21.0572 22.5C21.3096 22.5 21.5144 22.2952 21.5144 22.0428C21.5144 16.2443 16.7975 11.5283 10.9998 11.5283Z"
                                                             fill="#333E48" stroke="#333E48" stroke-width="0.3" />
@@ -143,92 +146,97 @@
                                                     </svg>
 
                                                 </span>
-                                            <p class="body-small">
-                                                Login
-                                            </p>
+                                                <p class="body-small">
+                                                    Login
+                                                </p>
+                                            </a>
+                                        </li>
+                                    @endguest
+                                    <li class="d-flex align-items-center d-xl-none">
+                                        <a href="#mobileMenu" class="mobile-button" data-bs-toggle="offcanvas"
+                                            aria-controls="mobileMenu">
+                                            <span></span>
                                         </a>
                                     </li>
-                                @endguest
-                                <li class="d-flex align-items-center d-xl-none">
-                                    <a href="#mobileMenu" class="mobile-button" data-bs-toggle="offcanvas"
-                                       aria-controls="mobileMenu">
-                                        <span></span>
-                                    </a>
-                                </li>
-                            </ul>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
+        </header>
+        <!-- /Header -->
 
+        <!-- Main Content -->
+        <div class="flat-content">
+            <div class="container">
+                @yield("body")
+            </div>
         </div>
-    </header>
-    <!-- /Header -->
+        <!-- /Main Content -->
 
-    <!-- Main Content -->
-    <div class="flat-content">
-        <div class="container">
-            @yield("body")
-        </div>
+        <!-- /Iconbox -->
+        <!-- Footer -->
+        @yield("footer")
+        <!-- /Footer -->
+        <div class="overlay-filter" id="overlay-filter"></div>
     </div>
-    <!-- /Main Content -->
+    <!-- Login -->
+    @include("partials.login")
+    <!-- /Login -->
+    <!-- Register -->
+    @include("partials.register")
+    <!-- /Register -->
+    <!-- Shopping Cart -->
+    @include("partials.shopping-cart")
+    <!-- /Shopping Cart -->
 
-    <!-- /Iconbox -->
-    <!-- Footer -->
-    @yield("footer")
-    <!-- /Footer -->
-    <div class="overlay-filter" id="overlay-filter"></div>
-</div>
-<!-- Login -->
-@include("partials.login")
-<!-- /Login -->
-<!-- Register -->
-@include("partials.register")
-<!-- /Register -->
-<!-- Shopping Cart -->
-@include("partials.shopping-cart")
-<!-- /Shopping Cart -->
+    <!-- Javascript -->
+    <script src="{{ asset("home/js/bootstrap.min.js") }}"></script>
+    <script src="{{ asset("home/js/jquery.min.js") }}"></script>
+    <script src="{{ asset("home/js/jquery.nice-select.js") }}"></script>
+    <script src="{{ asset("home/js/swiper-bundle.min.js") }}"></script>
+    <script src="{{ asset("home/js/carousel.js") }}"></script>
+    <script src="{{ asset("home/js/bootstrap-select.min.js") }}"></script>
+    <script src="{{ asset("home/js/lazysize.min.js") }}"></script>
+    <script src="{{ asset("home/js/count-down.js") }}"></script>
+    <script src="{{ asset("home/js/drift.min.js") }}"></script>
+    <script src="{{ asset("home/js/wow.min.js") }}"></script>
+    <script src="{{ asset("home/js/multiple-modal.js") }}"></script>
+    <script src="{{ asset("home/js/infinityslide.js") }}"></script>
+    <script src="{{ asset("home/js/shop.js") }}"></script>
+    <script src="{{ asset("home/js/main.js") }}"></script>
+    <script src="{{ asset("home/js/sibforms.js") }}" defer></script>
+    <script src="{{ asset("home/js/filter-custom.js") }}"></script>
+    <script type="module" src="{{ asset("home/js/zoom.js") }}"></script>
+    <script src="{{ asset("home/js/cart.js") }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<!-- Javascript -->
-<script src="{{ asset("home/js/bootstrap.min.js") }}"></script>
-<script src="{{ asset("home/js/jquery.min.js") }}"></script>
-<script src="{{ asset("home/js/jquery.nice-select.js") }}"></script>
-<script src="{{ asset("home/js/swiper-bundle.min.js") }}"></script>
-<script src="{{ asset("home/js/carousel.js") }}"></script>
-<script src="{{ asset("home/js/bootstrap-select.min.js") }}"></script>
-<script src="{{ asset("home/js/lazysize.min.js") }}"></script>
-<script src="{{ asset("home/js/count-down.js") }}"></script>
-<script src="{{ asset("home/js/drift.min.js") }}"></script>
-<script src="{{ asset("home/js/wow.min.js") }}"></script>
-<script src="{{ asset("home/js/multiple-modal.js") }}"></script>
-<script src="{{ asset("home/js/infinityslide.js") }}"></script>
-<script src="{{ asset("home/js/shop.js") }}"></script>
-<script src="{{ asset("home/js/main.js") }}"></script>
-<script src="{{ asset("home/js/sibforms.js") }}" defer></script>
-<script src="{{ asset("home/js/filter-custom.js") }}"></script>
-<script type="module" src="{{ asset("home/js/zoom.js") }}"></script>
-<script src="{{ asset("home/js/cart.js") }}"></script>
-@stack("scripts")
-<script>
-    window.REQUIRED_CODE_ERROR_MESSAGE = 'Please choose a country code';
-    window.LOCALE = 'en';
-    window.EMAIL_INVALID_MESSAGE = window.SMS_INVALID_MESSAGE =
-        "The information provided is invalid. Please review the field format and try again.";
+    @stack("scripts")
+    <script>
+        $(document).ready(function() {
+            $('.js-example-basic-single').select2();
+        });
+        window.REQUIRED_CODE_ERROR_MESSAGE = 'Please choose a country code';
+        window.LOCALE = 'en';
+        window.EMAIL_INVALID_MESSAGE = window.SMS_INVALID_MESSAGE =
+            "The information provided is invalid. Please review the field format and try again.";
 
-    window.REQUIRED_ERROR_MESSAGE = "This field cannot be left blank. ";
+        window.REQUIRED_ERROR_MESSAGE = "This field cannot be left blank. ";
 
-    window.GENERIC_INVALID_MESSAGE =
-        "The information provided is invalid. Please review the field format and try again.";
+        window.GENERIC_INVALID_MESSAGE =
+            "The information provided is invalid. Please review the field format and try again.";
 
-    window.translation = {
-        common: {
-            selectedList: '{quantity} list selected',
-            selectedLists: '{quantity} lists selected'
-        }
-    };
+        window.translation = {
+            common: {
+                selectedList: '{quantity} list selected',
+                selectedLists: '{quantity} lists selected'
+            }
+        };
 
-    var AUTOHIDE = Boolean(0);
-</script>
+        var AUTOHIDE = Boolean(0);
+    </script>
 </body>
 
 </html>

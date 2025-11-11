@@ -11,10 +11,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
+    // RajaOngkir Configuration
+    private $rajaOngkirApiKey = 'Ez5B5zBi075316d84865ccd9nV4SQITj';
+    private $rajaOngkirBaseUrl = 'https://rajaongkir.komerce.id/api/v1';
+    private $originDistrict = '41140'; // Your origin district
+
     /**
      * Display shopping cart page
      */
@@ -45,6 +51,9 @@ class CartController extends Controller
             'alamat' => 'required|string',
             'cart_data' => 'required|json',
             'bukti_transfer' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'ongkir' => 'required|numeric|min:0',
+            'kurir' => 'required|string',
+            'layanan_ongkir' => 'required|string',
         ]);
 
         try {
@@ -57,11 +66,15 @@ class CartController extends Controller
                 return redirect()->back()->with('error', 'Keranjang belanja kosong');
             }
 
-            // Calculate total
-            $totalBayar = 0;
+            // Calculate subtotal from cart
+            $subtotal = 0;
             foreach ($cartData as $item) {
-                $totalBayar += $item['harga'] * $item['quantity'];
+                $subtotal += $item['harga'] * $item['quantity'];
             }
+
+            // Add shipping cost to total
+            $ongkir = floatval($validated['ongkir']);
+            $totalBayar = $subtotal + $ongkir;
 
             // Generate invoice code
             $kodeInvoice = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
@@ -85,7 +98,7 @@ class CartController extends Controller
                 $buktiPembayaran = 'uploads/payments/' . $filename;
             }
 
-            // Create invoice
+            // Create invoice with shipping information
             $invoice = Invoice::create([
                 'kode_invoice' => $kodeInvoice,
                 'tanggal' => now(),
@@ -94,6 +107,9 @@ class CartController extends Controller
                 'no_hp' => $validated['no_hp'],
                 'alamat' => $validated['alamat'],
                 'total_bayar' => $totalBayar,
+                'ongkir' => $ongkir,
+                'kurir' => $validated['kurir'],
+                'layanan_pengiriman' => $validated['layanan_ongkir'],
                 'status_pembayaran' => $buktiPembayaran ? 'pending' : 'pending',
                 'status_pengiriman' => false,
                 'bukti_pembayaran' => $buktiPembayaran,
@@ -248,5 +264,118 @@ class CartController extends Controller
         }
 
         return redirect()->back()->with('error', 'Gagal mengunggah bukti pembayaran');
+    }
+
+    /**
+     * Get districts from RajaOngkir API for Select2
+     */
+    public function getDistricts(Request $request)
+    {
+        try {
+            $search = $request->get('q', '');
+            $page = $request->get('page', 1);
+
+            $response = Http::withHeaders([
+                'key' => $this->rajaOngkirApiKey
+            ])->get($this->rajaOngkirBaseUrl . '/destination/domestic-destination', [
+                'search' => $search
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                if (isset($data['data']) && is_array($data['data'])) {
+                    // Format for Select2
+                    $results = array_map(function($district) {
+                        return [
+                            'id' => $district['id'],
+                            'text' => $district['label']
+                        ];
+                    }, $data['data']);
+
+                    return response()->json([
+                        'results' => $results,
+                        'pagination' => ['more' => false]
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'results' => [],
+                'pagination' => ['more' => false]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'results' => [],
+                'pagination' => ['more' => false],
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate shipping cost from RajaOngkir API
+     */
+    public function calculateShippingCost(Request $request)
+    {
+        $request->validate([
+            'destination' => 'required',
+            'weight' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $response = Http::withHeaders([
+                'key' => $this->rajaOngkirApiKey,
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            ])->asForm()->post($this->rajaOngkirBaseUrl . '/calculate/domestic-cost', [
+                'origin' => $this->originDistrict,
+                'destination' => $request->destination,
+                'weight' => $request->weight,
+                'courier' => 'jnt', // J&T Express
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                if (isset($data['data']) && is_array($data['data']) && count($data['data']) > 0) {
+                    // Format services from response
+                    $services = array_map(function($service) {
+                        return [
+                            'service' => $service['service'],
+                            'description' => $service['description'],
+                            'cost' => $service['cost'],
+                            'etd' => $service['etd'] ?: 'Estimasi 2-3 hari',
+                        ];
+                    }, $data['data']);
+
+                    // Get courier info from first service
+                    $firstService = $data['data'][0];
+
+                    return response()->json([
+                        'success' => true,
+                        'courier' => strtoupper($firstService['code']),
+                        'courier_name' => $firstService['name'],
+                        'services' => $services
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada layanan pengiriman yang tersedia untuk tujuan ini'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghubungi server ongkir'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

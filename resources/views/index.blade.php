@@ -1,5 +1,5 @@
 @extends("template")
-@section("title", "Beranda - Aksesoris Ria")
+@section("title", "Beranda - RJ Lina")
 @section("body")
     <!-- Breakcrumbs -->
     <div class="tf-sp-1">
@@ -186,7 +186,7 @@
                                     <div>
                                         {{-- <p class="product-tag caption text-main-2 d-none">Headphone</p> --}}
                                         <a href="{{ route("produk.detail", $item->id_produk) }}"
-                                            class="name-product body-md-2 fw-semibold text-secondary link">
+                                            class="name-product body-md-2 fw-semibold link">
                                             {{ $item->nama }}
                                         </a>
                                     </div>

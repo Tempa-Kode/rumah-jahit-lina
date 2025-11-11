@@ -30,7 +30,7 @@
                         <span class="icon">
                             <i class="icon-shop-cart-1"></i>
                         </span>
-                        <a href="{{ route("cart") }}" class="link body-text-3">Keranjang Belanja</a>
+                        <a href="{{ route("cart") }}" class="text-dark">Keranjang Belanja</a>
                     </div>
                     <div class="step-payment active">
                         <span class="icon">
@@ -49,22 +49,14 @@
 
             <div class="tf-checkout-wrap flex-lg-nowrap">
                 <div class="page-checkout">
-                    @if ($customer)
-                        <div class="wrap">
-                            <h5 class="title has-account">
-                                <span class="fw-semibold">Informasi Akun</span>
-                            </h5>
-                            <div class="alert alert-info">
-                                <p class="mb-0">Anda login sebagai: <strong>{{ $customer->nama }}</strong></p>
-                                <p class="mb-0 small">Email: {{ $customer->email }}</p>
-                            </div>
-                        </div>
-                    @endif
 
                     <div class="wrap">
                         <h5 class="title fw-semibold">Informasi Pengiriman</h5>
                         <form id="checkout-form" class="def">
                             @csrf
+                            <input type="hidden" name="ongkir" id="input-ongkir" value="0" required>
+                            <input type="hidden" name="kurir" id="input-kurir" value="" required>
+                            <input type="hidden" name="layanan_ongkir" id="input-layanan-ongkir" value="" required>
                             <div class="cols">
                                 <fieldset>
                                     <label>Nama Lengkap <span class="text-danger">*</span></label>
@@ -76,6 +68,20 @@
                                 <label>Nomor HP / WhatsApp <span class="text-danger">*</span></label>
                                 <input type="tel" name="no_hp" value="{{ $customer->no_hp ?? "" }}"
                                     placeholder="08xx xxxx xxxx" required>
+                            </fieldset>
+                            <fieldset>
+                                <label>Cari Alamat untuk cek ongkir <span class="text-danger">*</span></label>
+                                <select class="form-control" name="destination" id="select-destination" required>
+                                    <option value="">Cari lokasi domestik (Ketik kecamatan/kota)</option>
+                                </select>
+                                <p class="caption text-main-2 mt-1">Ketik nama kecamatan atau kota untuk mencari alamat
+                                    pengiriman</p>
+                            </fieldset>
+                            <fieldset id="shipping-services-wrapper" style="display: none;">
+                                <label>Pilih Layanan Pengiriman <span class="text-danger">*</span></label>
+                                <select class="form-control" id="select-shipping-service" required>
+                                    <option value="">Pilih layanan pengiriman</option>
+                                </select>
                             </fieldset>
                             <fieldset>
                                 <label>Alamat Lengkap <span class="text-danger">*</span></label>
@@ -104,8 +110,10 @@
                                                 <p class="mb-2 body-text-3"><strong>Transfer ke:</strong></p>
                                                 <p class="mb-1 body-text-4">Bank BRI: 5322 0101 5797 536</p>
                                                 <p class="mb-2 body-text-4">a.n. Riahma Uli Br Saragih</p>
-                                                <p class="mb-2 body-text-4 mt-2">Atau <strong>scan QRIS</strong> berikut:</p>
-                                                <img src="{{ asset('home/images/qris.jpg') }}" alt="qris" class="w-50">
+                                                <p class="mb-2 body-text-4 mt-2">Atau <strong>scan QRIS</strong> berikut:
+                                                </p>
+                                                <img src="{{ asset("home/images/qris.jpg") }}" alt="qris"
+                                                    class="w-50">
                                                 <p class="mb-0 caption text-main-2">
                                                     Silakan transfer sesuai total pembayaran dan upload bukti transfer.
                                                 </p>
@@ -138,6 +146,8 @@
                         <ul class="sec-total-price">
                             <li><span class="body-text-3">Subtotal</span><span class="body-text-3"
                                     id="checkout-subtotal">Rp. 0</span></li>
+                            <li><span class="body-text-3">Ongkir</span><span class="body-text-3" id="checkout-ongkir">Rp.
+                                    0</span></li>
                             <li><span class="body-md-2 fw-semibold">Total</span><span
                                     class="body-md-2 fw-semibold text-primary" id="checkout-total">Rp. 0</span></li>
                         </ul>
@@ -307,9 +317,134 @@
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(renderCheckoutSummary, 100);
+                    initializeSelect2();
                 });
             } else {
                 setTimeout(renderCheckoutSummary, 100);
+                initializeSelect2();
+            }
+
+            // Initialize Select2 for district search
+            function initializeSelect2() {
+                $('#select-destination').select2({
+                    ajax: {
+                        url: '{{ route("rajaongkir.districts") }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term,
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.results,
+                                pagination: data.pagination
+                            };
+                        },
+                        cache: true
+                    },
+                    placeholder: 'Ketik nama kecamatan atau kota',
+                    minimumInputLength: 3,
+                    theme: 'bootstrap-5'
+                });
+
+                // When destination is selected, calculate shipping cost
+                $('#select-destination').on('select2:select', function(e) {
+                    const destinationId = e.params.data.id;
+                    calculateShipping(destinationId);
+                });
+            }
+
+            // Calculate shipping cost
+            function calculateShipping(destinationId) {
+                // Get cart to calculate weight (assuming 1kg per item for now)
+                const cartData = localStorage.getItem('ria_shopping_cart');
+                const cart = cartData ? JSON.parse(cartData) : [];
+
+                if (cart.length === 0) {
+                    return;
+                }
+
+                // Calculate total weight (in grams, minimum 1000g = 1kg)
+                // You can adjust this logic based on your product weight data
+                const totalWeight = cart.reduce((sum, item) => sum + (item.quantity * 1000), 0);
+
+                // Show loading state
+                $('#shipping-services-wrapper').hide();
+                $('#select-shipping-service').html('<option value="">Memuat layanan pengiriman...</option>');
+
+                // Call API to get shipping cost
+                fetch('{{ route("rajaongkir.cost") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            destination: destinationId,
+                            weight: totalWeight
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.services && data.services.length > 0) {
+                            // Populate shipping services
+                            let options = '<option value="">Pilih layanan pengiriman</option>';
+                            data.services.forEach(service => {
+                                const cost = parseInt(service.cost);
+                                options += `<option value="${service.service}"
+                                    data-cost="${cost}"
+                                    data-courier="${data.courier}"
+                                    data-etd="${service.etd}">
+                                    ${data.courier_name} - ${service.service} (${service.description}) - Rp. ${formatPrice(cost)} (${service.etd} hari)
+                                </option>`;
+                            });
+
+                            $('#select-shipping-service').html(options);
+                            $('#shipping-services-wrapper').show();
+
+                            // Handle service selection
+                            $('#select-shipping-service').off('change').on('change', function() {
+                                const selectedOption = $(this).find('option:selected');
+                                const cost = parseInt(selectedOption.data('cost')) || 0;
+                                const courier = selectedOption.data('courier') || '';
+                                const service = selectedOption.val() || '';
+
+                                // Update hidden inputs
+                                $('#input-ongkir').val(cost);
+                                $('#input-kurir').val(courier);
+                                $('#input-layanan-ongkir').val(service);
+
+                                // Update checkout summary
+                                updateCheckoutTotal(cost);
+                            });
+                        } else {
+                            alert(data.message || 'Tidak ada layanan pengiriman yang tersedia');
+                            $('#select-shipping-service').html('<option value="">Tidak ada layanan tersedia</option>');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghitung ongkir');
+                        $('#select-shipping-service').html('<option value="">Error memuat layanan</option>');
+                    });
+            }
+
+            // Update checkout total with shipping cost
+            function updateCheckoutTotal(shippingCost) {
+                const cartData = localStorage.getItem('ria_shopping_cart');
+                const cart = cartData ? JSON.parse(cartData) : [];
+
+                const subtotal = cart.reduce((sum, item) => {
+                    return sum + (parseInt(item.harga) * parseInt(item.quantity));
+                }, 0);
+
+                const total = subtotal + shippingCost;
+
+                document.getElementById('checkout-ongkir').textContent = `Rp. ${formatPrice(shippingCost)}`;
+                document.getElementById('checkout-total').textContent = `Rp. ${formatPrice(total)}`;
             }
         </script>
     @endpush

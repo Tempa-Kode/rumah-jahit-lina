@@ -72,3 +72,7 @@ Route::middleware('auth')->group(function () {
     Route::post('laporan/print', [App\Http\Controllers\LaporanController::class, 'print'])->name('laporan.print');
     Route::post('laporan/pdf', [App\Http\Controllers\LaporanController::class, 'downloadPdf'])->name('laporan.pdf');
 });
+
+// RajaOngkir Routes
+Route::get('/rajaongkir/districts', [App\Http\Controllers\CartController::class, 'getDistricts'])->name('rajaongkir.districts');
+Route::post('/rajaongkir/cost', [App\Http\Controllers\CartController::class, 'calculateShippingCost'])->name('rajaongkir.cost');
