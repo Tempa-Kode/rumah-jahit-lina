@@ -48,7 +48,7 @@
                 <a href="{{ route("profile.index") }}">
                     <img src="{{ asset(Auth::user()->foto ?? 'admin/images/avatars/avatar.png') }}">
                     <span class="activity-indicator"></span>
-                    <span class="user-info-text">{{ Auth::user()->nama }}<br><span class="user-state-info">Online</span></span>
+                    <span class="user-info-text">{{ \Illuminate\Support\Str::limit(Auth::user()->nama, '15', '...') }}<br><span class="user-state-info">Online</span></span>
                 </a>
             </div>
         </div>
