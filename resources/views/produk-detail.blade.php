@@ -56,7 +56,8 @@
                                         @endforelse
 
                                         @foreach ($produk->jenisProduk as $jenis)
-                                            <div class="swiper-slide" data-color="gray" data-jenis-id="{{ $jenis->id_jenis_produk }}">
+                                            <div class="swiper-slide" data-color="gray"
+                                                data-jenis-id="{{ $jenis->id_jenis_produk }}">
                                                 <a href="{{ asset($jenis->path_gambar) }}" target="_blank" class="item"
                                                     data-pswp-width="600px" data-pswp-height="800px">
                                                     <img class="tf-image-zoom lazyload"
@@ -142,20 +143,24 @@
                                                     </button>
                                                 </div>
                                             </div>
-                                            @if ($produk->jenisProduk)
+                                            @if ($produk->jenisProduk->count() > 0)
                                                 <div class="product-color">
                                                     <p class=" title body-text-3">
                                                         Jenis
                                                     </p>
-                                                    <div class="tf-select-color ">
-                                                        <select class="select-color">
-                                                            @foreach ($produk->jenisProduk as $jenis)
-                                                                <option value="{{ $jenis->id_jenis_produk }}"
-                                                                    {{ $jenis->id_jenis_produk == $produk->jenisProdukTerpilih ? "selected" : "" }}>
-                                                                    {{ $jenis->nama }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+                                                    <div class="tf-select-color">
+                                                        @foreach ($produk->jenisProduk as $jenis)
+                                                            <input type="checkbox" class="btn-check jenis-checkbox"
+                                                                id="jenis-{{ $jenis->id_jenis_produk }}"
+                                                                value="{{ $jenis->id_jenis_produk }}"
+                                                                data-jenis-nama="{{ $jenis->nama }}"
+                                                                {{ $jenis->id_jenis_produk == $produk->jenisProdukTerpilih ? "checked" : "" }}
+                                                                autocomplete="off">
+                                                            <label class="btn btn-outline-primary"
+                                                                for="jenis-{{ $jenis->id_jenis_produk }}">
+                                                                {{ $jenis->nama }}
+                                                            </label>
+                                                        @endforeach
                                                     </div>
                                                 </div>
                                             @endif
@@ -167,7 +172,8 @@
                                                         data-product-nama="{{ $produk->nama }}"
                                                         data-product-harga="{{ $produk->harga }}"
                                                         data-product-gambar="{{ $produk->gambarProduk->first() ? asset($produk->gambarProduk->first()->path_gambar) : asset("home/images/no-image.png") }}"
-                                                        data-product-kategori="{{ $produk->kategori->nama }}">
+                                                        data-product-kategori="{{ $produk->kategori->nama }}"
+                                                        data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}">
                                                         Tambah Keranjang
                                                         <i class="icon-cart-2"></i>
                                                     </a>
@@ -195,47 +201,107 @@
     @push("scripts")
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const selectJenis = document.querySelector('.select-color');
+                const jenisCheckboxes = document.querySelectorAll('.jenis-checkbox');
+                const btnAddToCart = document.querySelector('.btn-add-to-cart');
 
-                function selectJenisById(id) {
-                    if (!selectJenis) return;
-                    // set value hanya jika option tersebut ada
-                    const option = selectJenis.querySelector('option[value="' + id + '"]');
-                    if (option) {
-                        selectJenis.value = id;
-                        // trigger change agar behavior lain tetap jalan (mis. slideTo sudah ada di listener change)
-                        selectJenis.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
+                // Fungsi untuk mendapatkan checkbox yang terpilih
+                function getSelectedJenis() {
+                    const checked = document.querySelector('.jenis-checkbox:checked');
+                    return checked ? {
+                        id: checked.value,
+                        nama: checked.getAttribute('data-jenis-nama')
+                    } : null;
+                }
+
+                // Fungsi untuk update gambar slider berdasarkan jenis yang dipilih
+                function updateSliderByJenis(jenisId) {
+                    const swiperMain = document.querySelector('#gallery-swiper-started');
+                    if (swiperMain && swiperMain.swiper) {
+                        const slides = swiperMain.querySelectorAll('.swiper-slide');
+                        let targetIndex = -1;
+
+                        slides.forEach((slide, index) => {
+                            if (slide.getAttribute('data-jenis-id') === jenisId) {
+                                targetIndex = index;
+                            }
+                        });
+
+                        if (targetIndex !== -1) {
+                            swiperMain.swiper.slideTo(targetIndex);
+                        }
                     }
                 }
 
-                if (selectJenis) {
-                    selectJenis.addEventListener('change', function() {
-                        const jenisId = this.value;
+                // Fungsi untuk update gambar pada tombol keranjang
+                function updateCartImage() {
+                    if (!btnAddToCart) return;
 
-                        // Cari swiper instance
+                    const selectedJenis = getSelectedJenis();
+
+                    if (selectedJenis && selectedJenis.id) {
                         const swiperMain = document.querySelector('#gallery-swiper-started');
-                        if (swiperMain && swiperMain.swiper) {
-                            // Cari slide yang memiliki data-jenis-id yang sesuai
-                            const slides = swiperMain.querySelectorAll('.swiper-slide');
-                            let targetIndex = -1;
-
-                            slides.forEach((slide, index) => {
-                                if (slide.getAttribute('data-jenis-id') === jenisId) {
-                                    targetIndex = index;
+                        if (swiperMain) {
+                            const targetSlide = swiperMain.querySelector('.swiper-slide[data-jenis-id="' +
+                                selectedJenis.id + '"]');
+                            if (targetSlide) {
+                                const img = targetSlide.querySelector('img');
+                                if (img) {
+                                    const imgSrc = img.getAttribute('src') || img.getAttribute('data-src');
+                                    if (imgSrc) {
+                                        btnAddToCart.setAttribute('data-product-gambar', imgSrc);
+                                    }
                                 }
-                            });
-
-                            // Jika ditemukan, navigasi ke slide tersebut
-                            if (targetIndex !== -1) {
-                                swiperMain.swiper.slideTo(targetIndex);
                             }
                         }
-                    });
+                        // Simpan jenis yang dipilih ke data attribute
+                        btnAddToCart.setAttribute('data-product-jenis-id', selectedJenis.id);
+                        btnAddToCart.setAttribute('data-product-jenis-nama', selectedJenis.nama);
+                    } else {
+                        // Jika tidak ada jenis yang dipilih, gunakan gambar default (gambar produk pertama)
+                        btnAddToCart.removeAttribute('data-product-jenis-id');
+                        btnAddToCart.removeAttribute('data-product-jenis-nama');
+                    }
                 }
 
-                // Klik pada thumbnail (delegated) -> pilih jenis jika slide punya data-jenis-id
+                // Fungsi untuk memilih checkbox berdasarkan ID
+                function selectJenisById(id) {
+                    const checkbox = document.querySelector('.jenis-checkbox[value="' + id + '"]');
+                    if (checkbox) {
+                        // Uncheck semua checkbox lainnya
+                        jenisCheckboxes.forEach(cb => {
+                            if (cb !== checkbox) {
+                                cb.checked = false;
+                            }
+                        });
+                        // Check checkbox yang dipilih
+                        checkbox.checked = true;
+                        // Update slider dan cart image
+                        updateSliderByJenis(id);
+                        updateCartImage();
+                    }
+                }
+
+                // Event listener untuk setiap checkbox
+                jenisCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            // Uncheck semua checkbox lainnya
+                            jenisCheckboxes.forEach(cb => {
+                                if (cb !== this) {
+                                    cb.checked = false;
+                                }
+                            });
+                            // Update slider dan cart image
+                            updateSliderByJenis(this.value);
+                            updateCartImage();
+                        } else {
+                            // Jika di-uncheck, reset ke gambar default
+                            updateCartImage();
+                        }
+                    });
+                });
+
+                // Klik pada thumbnail -> pilih jenis jika slide punya data-jenis-id
                 const thumbsContainer = document.querySelector('.tf-product-media-thumbs');
                 if (thumbsContainer) {
                     thumbsContainer.addEventListener('click', function(e) {
@@ -261,38 +327,8 @@
                     });
                 }
 
-                // Update gambar keranjang saat jenis dipilih
-                function updateCartImage() {
-                    const btnAddToCart = document.querySelector('.btn-add-to-cart');
-                    if (!btnAddToCart || !selectJenis) return;
-
-                    const selectedJenisId = selectJenis.value;
-
-                    if (selectedJenisId) {
-                        // Cari slide dengan data-jenis-id yang sesuai
-                        const swiperMain = document.querySelector('#gallery-swiper-started');
-                        if (swiperMain) {
-                            const targetSlide = swiperMain.querySelector('.swiper-slide[data-jenis-id="' +
-                                selectedJenisId + '"]');
-                            if (targetSlide) {
-                                const img = targetSlide.querySelector('img');
-                                if (img) {
-                                    const imgSrc = img.getAttribute('src') || img.getAttribute('data-src');
-                                    if (imgSrc) {
-                                        btnAddToCart.setAttribute('data-product-gambar', imgSrc);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Update gambar saat jenis berubah
-                if (selectJenis) {
-                    selectJenis.addEventListener('change', updateCartImage);
-                    // Update saat halaman pertama kali dimuat (jika ada jenis terpilih)
-                    updateCartImage();
-                }
+                // Update gambar saat halaman pertama kali dimuat (jika ada jenis terpilih)
+                updateCartImage();
             });
         </script>
     @endpush

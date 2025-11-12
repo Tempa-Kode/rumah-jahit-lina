@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -65,6 +66,9 @@ class CartController extends Controller
                 return redirect()->back()->with('error', 'Keranjang belanja kosong');
             }
 
+            // Debug log
+            Log::info('Cart data received:', $cartData);
+
             // Calculate subtotal from cart
             $subtotal = 0;
             foreach ($cartData as $item) {
@@ -105,16 +109,16 @@ class CartController extends Controller
                 }
 
                 // Check if item has variant/jenis
-                if (isset($item['jenis_id']) && $item['jenis_id']) {
+                if (isset($item['jenis_id']) && $item['jenis_id'] && $item['jenis_id'] !== 'null') {
                     // Check stock from jenis_produk
                     $jenisProduk = JenisProduk::find($item['jenis_id']);
 
                     if (!$jenisProduk) {
-                        throw new \Exception("Varian produk tidak ditemukan");
+                        throw new \Exception("Varian produk tidak ditemukan (Jenis ID: {$item['jenis_id']})");
                     }
 
                     if ($jenisProduk->jumlah_produk < $item['quantity']) {
-                        throw new \Exception("Stok varian {$jenisProduk->nama} dari produk {$produk->nama} tidak mencukupi");
+                        throw new \Exception("Stok varian '{$jenisProduk->nama}' dari produk '{$produk->nama}' tidak mencukupi (Tersedia: {$jenisProduk->jumlah_produk}, Diminta: {$item['quantity']})");
                     }
 
                     // Save stock before update
@@ -143,13 +147,16 @@ class CartController extends Controller
                         'stok_akhir' => $stokAwal - $item['quantity'],
                     ]);
                 } else {
-                    // Check stock from produk (no variant)
-                    if ($produk->stok < $item['quantity']) {
-                        throw new \Exception("Stok produk {$produk->nama} tidak mencukupi");
+                    // Check stock from produk (no variant selected)
+                    // Use main product stock (jumlah_produk)
+                    $stokProduk = $produk->jumlah_produk ?? 0;
+
+                    if ($stokProduk < $item['quantity']) {
+                        throw new \Exception("Stok produk '{$produk->nama}' tidak mencukupi (Tersedia: {$stokProduk}, Diminta: {$item['quantity']})");
                     }
 
                     // Save stock before update
-                    $stokAwal = $produk->stok;
+                    $stokAwal = $stokProduk;
 
                     // Create item transaction
                     ItemTransaksi::create([
@@ -161,9 +168,7 @@ class CartController extends Controller
                     ]);
 
                     // Update product stock
-                    $produk->decrement('stok', $item['quantity']);
-
-                    // Record stock history for main product
+                    $produk->decrement('jumlah_produk', $item['quantity']);                    // Record stock history for main product
                     RiwayatStokProduk::create([
                         'produk_id' => $item['id'],
                         'jenis_produk_id' => null,

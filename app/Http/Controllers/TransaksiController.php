@@ -44,7 +44,7 @@ class TransaksiController extends Controller
      */
     public function show(string $id)
     {
-        $transaksi = Invoice::with(['customer', 'itemTransaksi.produk.gambarProduk'])
+        $transaksi = Invoice::with(['customer', 'itemTransaksi.produk.gambarProduk', 'itemTransaksi.jenisProduk'])
             ->findOrFail($id);
         return view('transaksi.show', compact('transaksi'));
     }
@@ -54,7 +54,7 @@ class TransaksiController extends Controller
      */
     public function invoice(string $id)
     {
-        $transaksi = Invoice::with(['customer', 'itemTransaksi.produk'])
+        $transaksi = Invoice::with(['customer', 'itemTransaksi.produk', 'itemTransaksi.jenisProduk'])
             ->findOrFail($id);
         return view('transaksi.invoice', compact('transaksi'));
     }

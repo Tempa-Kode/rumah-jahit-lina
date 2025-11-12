@@ -1,6 +1,6 @@
-@extends('template-dashboard')
-@section('title', 'Detail Transaksi')
-@section('main')
+@extends("template-dashboard")
+@section("title", "Detail Transaksi")
+@section("main")
     <div class="row">
         <div class="section-description section-description-inline">
             <h1>Detail Transaksi</h1>
@@ -69,37 +69,42 @@
                     <div class="table-responsive">
                         <table class="table bordered-table mb-0">
                             <thead>
-                            <tr>
-                                <th>Produk</th>
-                                <th>Harga</th>
-                                <th>Jumlah</th>
-                                <th>Subtotal</th>
-                            </tr>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>Harga</th>
+                                    <th>Jumlah</th>
+                                    <th>Subtotal</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            @foreach ($transaksi->itemTransaksi as $item)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span>{{ $item->produk->nama }}</span>
-                                        </div>
-                                    </td>
-                                    <td>Rp {{ number_format($item->produk->harga, 0, ",", ".") }}</td>
-                                    <td>{{ $item->jumlah }}</td>
-                                    <td class="fw-semibold">Rp
-                                        {{ number_format($item->produk->harga * $item->jumlah, 0, ",", ".") }}</td>
+                                @foreach ($transaksi->itemTransaksi as $item)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="fw-semibold">{{ $item->produk->nama }}</span>
+                                                @if ($item->jenis_produk_id && $item->jenisProduk)
+                                                    <span class="text-secondary-light text-sm">
+                                                        <i class="text-primary">Jenis:</i> {{ $item->jenisProduk->nama }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>Rp {{ number_format($item->produk->harga, 0, ",", ".") }}</td>
+                                        <td>{{ $item->jumlah }}</td>
+                                        <td class="fw-semibold">Rp
+                                            {{ number_format($item->produk->harga * $item->jumlah, 0, ",", ".") }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="bg-base">
+                                    <td colspan="3" class="text-end">Ongkos Kirim:</td>
+                                    <td class="">Rp
+                                        {{ number_format($transaksi->ongkir, 0, ",", ".") }}</td>
                                 </tr>
-                            @endforeach
-                            <tr class="bg-base">
-                                <td colspan="3" class="text-end">Ongkos Kirim:</td>
-                                <td class="">Rp
-                                    {{ number_format($transaksi->ongkir, 0, ",", ".") }}</td>
-                            </tr>
-                            <tr class="bg-base">
-                                <td colspan="3" class="text-end fw-bold">TOTAL:</td>
-                                <td class="fw-bold text-success">Rp
-                                    {{ number_format($transaksi->total_bayar, 0, ",", ".") }}</td>
-                            </tr>
+                                <tr class="bg-base">
+                                    <td colspan="3" class="text-end fw-bold">TOTAL:</td>
+                                    <td class="fw-bold text-success">Rp
+                                        {{ number_format($transaksi->total_bayar, 0, ",", ".") }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -167,7 +172,7 @@
                                 Nomor Resi <span class="text-danger-600">*</span>
                             </label>
                             <input type="text" class="form-control radius-8" name="resi"
-                                   value="{{ $transaksi->resi }}" placeholder="Masukkan nomor resi" required>
+                                value="{{ $transaksi->resi }}" placeholder="Masukkan nomor resi" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -195,8 +200,7 @@
             <iconify-icon icon="solar:arrow-left-outline" class="icon"></iconify-icon>
             Kembali
         </a>
-        <a href="{{ route("transaksi.invoice", $transaksi->id_invoice) }}"
-           class="btn btn-success px-24 py-12 radius-8">
+        <a href="{{ route("transaksi.invoice", $transaksi->id_invoice) }}" class="btn btn-success px-24 py-12 radius-8">
             <iconify-icon icon="solar:download-linear" class="icon"></iconify-icon>
             Download Invoice
         </a>

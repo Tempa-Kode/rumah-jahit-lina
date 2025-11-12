@@ -300,13 +300,41 @@ class ShoppingCart {
             productData.quantity = parseInt(quantityInput.value) || 1;
         }
 
-        // Get jenis if exists
-        const jenisSelect = document.querySelector(".select-color");
-        if (jenisSelect) {
-            const selectedOption =
-                jenisSelect.options[jenisSelect.selectedIndex];
-            productData.jenis_id = parseInt(jenisSelect.value);
-            productData.jenis_nama = selectedOption.text;
+        // Check if product has variants
+        const hasVariants = document.querySelector(".jenis-checkbox") !== null;
+
+        // Get jenis if exists - check for data attributes first (from checkbox)
+        if (btn.dataset.productJenisId && btn.dataset.productJenisNama) {
+            productData.jenis_id = parseInt(btn.dataset.productJenisId);
+            productData.jenis_nama = btn.dataset.productJenisNama;
+        } else {
+            // Fallback to checkbox (jika attribute tidak ada)
+            const jenisCheckbox = document.querySelector(
+                ".jenis-checkbox:checked"
+            );
+            if (jenisCheckbox) {
+                productData.jenis_id = parseInt(jenisCheckbox.value);
+                productData.jenis_nama =
+                    jenisCheckbox.getAttribute("data-jenis-nama");
+            } else {
+                // Legacy support for select element
+                const jenisSelect = document.querySelector(".select-color");
+                if (jenisSelect) {
+                    const selectedOption =
+                        jenisSelect.options[jenisSelect.selectedIndex];
+                    productData.jenis_id = parseInt(jenisSelect.value);
+                    productData.jenis_nama = selectedOption.text;
+                }
+            }
+        }
+
+        // Optional: Show warning if product has variants but none selected
+        // But still allow adding to cart (for products that have both main stock and variants)
+        if (hasVariants && !productData.jenis_id) {
+            // Just show info, don't block
+            console.log(
+                "Info: Produk memiliki varian, tapi tidak ada yang dipilih. Menggunakan stok utama produk."
+            );
         }
 
         this.addToCart(productData);
@@ -317,14 +345,20 @@ class ShoppingCart {
         // Create notification element
         const notification = document.createElement("div");
         notification.className = `cart-notification alert alert-${type}`;
+
+        let bgColor = "#28a745"; // success (green)
+        if (type === "info") bgColor = "#17a2b8";
+        if (type === "warning") bgColor = "#ffc107";
+        if (type === "danger" || type === "error") bgColor = "#dc3545";
+
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
             padding: 15px 20px;
-            background: ${type === "success" ? "#28a745" : "#17a2b8"};
-            color: white;
+            background: ${bgColor};
+            color: ${type === "warning" ? "#000" : "#fff"};
             border-radius: 5px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             animation: slideIn 0.3s ease-out;

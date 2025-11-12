@@ -14,6 +14,14 @@ class ProdukDetailController extends Controller
         $produk = Produk::with(['kategori', 'gambarProduk', 'jenisProduk', 'itemTransaksi.invoice'])
             ->findOrFail($id);
 
+        // Set jenis produk terpilih default (jenis pertama yang ada stok)
+        if ($produk->jenisProduk->count() > 0) {
+            $jenisTerpilih = $produk->jenisProduk->where('jumlah_produk', '>', 0)->first();
+            $produk->jenisProdukTerpilih = $jenisTerpilih ? $jenisTerpilih->id_jenis_produk : $produk->jenisProduk->first()->id_jenis_produk;
+        } else {
+            $produk->jenisProdukTerpilih = null;
+        }
+
         // Ambil produk terkait (dari kategori yang sama, kecuali produk ini)
         $produkTerkait = Produk::with(['kategori', 'gambarProduk', 'jenisProduk'])
             ->where('kategori_id', $produk->kategori_id)

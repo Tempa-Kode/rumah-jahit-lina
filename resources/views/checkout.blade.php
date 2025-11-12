@@ -91,7 +91,6 @@
                     </div>
 
                     <div class="wrap">
-                        <h5 class="title fw-semibold">Metode Pembayaran</h5>
                         <div class="form-payment">
                             <div class="box-btn">
                                 <button type="button" id="btn-place-order" class="tf-btn w-100">
@@ -193,6 +192,9 @@
                     alert('Keranjang belanja kosong!');
                     return;
                 }
+
+                // Debug: Log cart data
+                console.log('Cart data being sent:', cart);
 
                 // Disable button
                 this.disabled = true;
