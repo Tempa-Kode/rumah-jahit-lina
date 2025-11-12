@@ -1,7 +1,7 @@
-@extends('template-dashboard')
-@section('title', 'Dashboard Admin')
-@section('halaman', 'Dashboard')
-@section('main')
+@extends("template-dashboard")
+@section("title", "Dashboard Admin")
+@section("halaman", "Dashboard")
+@section("main")
     <div class="container">
         <div class="row">
             <div class="col">
@@ -86,10 +86,11 @@
                         <div class="col-12">
                             <div class="widget-stats-large-chart-container">
                                 <div class="card-header">
-                                    <h5 class="card-title">Earnings<span class="badge badge-light badge-style-light">Last Year</span></h5>
+                                    <h5 class="card-title">Transaksi & Pendapatan<span
+                                            class="badge badge-success badge-style-light">30 Hari Terakhir</span></h5>
                                 </div>
                                 <div class="card-body">
-                                    <div id="apex-earnings"></div>
+                                    <div id="apex-transaksi"></div>
                                 </div>
                             </div>
                         </div>
@@ -105,7 +106,8 @@
                     <div
                         class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center justify-content-between">
                         <h6 class="text-lg fw-semibold mb-0 card-title">
-                            <iconify-icon icon="solar:danger-triangle-bold-duotone"class="text-danger-600 me-2"></iconify-icon>
+                            <iconify-icon
+                                icon="solar:danger-triangle-bold-duotone"class="text-danger-600 me-2"></iconify-icon>
                             Peringatan Stok Produk (≤ 5 Unit)
                         </h6>
                         <span class="badge bg-danger-100 text-danger-600">{{ $stokProduk->count() }} Item</span>
@@ -113,7 +115,8 @@
                     <div class="card-body p-24">
                         @if ($stokProduk->count() > 0)
                             <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
-                                <iconify-icon icon="solar:info-circle-bold" class="text-warning-600 me-2" style="font-size: 20px;"></iconify-icon>
+                                <iconify-icon icon="solar:info-circle-bold" class="text-warning-600 me-2"
+                                    style="font-size: 20px;"></iconify-icon>
                                 <div>
                                     <strong>Perhatian!</strong> Produk-produk berikut memiliki stok ≤ 5 unit. Segera
                                     lakukan restok!
@@ -122,28 +125,28 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover align-middle mb-0">
                                     <thead class="bg-base">
-                                    <tr>
-                                        <th class="text-center" style="width: 50px;">No</th>
-                                        <th>Nama Produk</th>
-                                        <th>Jenis Produk</th>
-                                        <th class="text-center" style="width: 150px;">Stok Tersisa</th>
-                                    </tr>
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">No</th>
+                                            <th>Nama Produk</th>
+                                            <th>Jenis Produk</th>
+                                            <th class="text-center" style="width: 150px;">Stok Tersisa</th>
+                                        </tr>
                                     </thead>
                                     <tbody>
-                                    @foreach ($stokProduk as $index => $item)
-                                        <tr>
-                                            <td class="text-center">{{ $index + 1 }}</td>
-                                            <td>
-                                                  <span class="fw-semibold text-primary">{{ $item["nama_produk"] }}</span>
-                                            </td>
-                                            <td>{{ $item["nama_jenis"] ?? 'Produk Utama'}}</td>
-                                            <td class="text-center">
-                                                <span class="fw-bold text-danger-600" style="font-size: 18px;">
-                                                    {{ $item["stok"] }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                        @foreach ($stokProduk as $index => $item)
+                                            <tr>
+                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td>
+                                                    <span class="fw-semibold text-primary">{{ $item["nama_produk"] }}</span>
+                                                </td>
+                                                <td>{{ $item["nama_jenis"] ?? "Produk Utama" }}</td>
+                                                <td class="text-center">
+                                                    <span class="fw-bold text-danger-600" style="font-size: 18px;">
+                                                        {{ $item["stok"] }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -169,8 +172,7 @@
                     <div class="card-body p-24">
                         <div class="d-flex align-items-center gap-3 mb-20">
                             <img src="{{ Auth::user()->foto ? asset(Auth::user()->foto) : asset("admin/images/avatars/avatar.png") }}"
-                                 alt="User" class="rounded-circle"
-                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                alt="User" class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
                             <div>
                                 <h6 class="mb-1 fw-semibold">{{ Auth::user()->nama }}</h6>
                                 <p class="mb-0 text-sm text-secondary-light">{{ Auth::user()->email }}</p>
@@ -207,3 +209,101 @@
         </div>
     </div>
 @endsection
+
+@push("script")
+    <script>
+        // Data dari backend
+        var chartDates = @json($chartDates);
+        var chartTotals = @json($chartTotals);
+        var chartRevenue = @json($chartRevenue);
+
+        // Chart Transaksi & Pendapatan
+        var options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: [{
+                name: 'Jumlah Transaksi',
+                data: chartTotals
+            }, {
+                name: 'Pendapatan (Rp)',
+                data: chartRevenue
+            }],
+            xaxis: {
+                categories: chartDates,
+                labels: {
+                    style: {
+                        colors: '#9ca3af'
+                    }
+                }
+            },
+            yaxis: [{
+                title: {
+                    text: 'Jumlah Transaksi'
+                },
+                labels: {
+                    style: {
+                        colors: '#9ca3af'
+                    }
+                }
+            }, {
+                opposite: true,
+                title: {
+                    text: 'Pendapatan (Rp)'
+                },
+                labels: {
+                    formatter: function(val) {
+                        return 'Rp ' + val.toLocaleString('id-ID');
+                    },
+                    style: {
+                        colors: '#9ca3af'
+                    }
+                }
+            }],
+            colors: ['#3b82f6', '#10b981'],
+            fill: {
+                opacity: 1
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right'
+            },
+            grid: {
+                borderColor: '#e5e7eb'
+            },
+            tooltip: {
+                y: [{
+                    formatter: function(val) {
+                        return val + " transaksi";
+                    }
+                }, {
+                    formatter: function(val) {
+                        return "Rp " + val.toLocaleString('id-ID');
+                    }
+                }]
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#apex-transaksi"), options);
+        chart.render();
+    </script>
+@endpush

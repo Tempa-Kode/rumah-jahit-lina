@@ -127,7 +127,25 @@ class HomeController extends Controller
         // 3. Gabungkan dan sort berdasarkan stok
         $stokProduk = $produkUtama->concat($jenisProdukRendah)
             ->sortBy('stok')
-            ->values();        return view('dashboard', compact(
+            ->values();
+
+        // Data Chart Transaksi - 30 hari terakhir
+        $chartData = \App\Models\Invoice::selectRaw('DATE(tanggal) as date, COUNT(*) as total, SUM(total_bayar) as revenue')
+            ->where('tanggal', '>=', now()->subDays(30))
+            ->where('status_pembayaran', 'terima')
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // Format data untuk chart
+        $chartDates = $chartData->pluck('date')->map(function($date) {
+            return \Carbon\Carbon::parse($date)->format('d M');
+        })->toArray();
+
+        $chartTotals = $chartData->pluck('total')->toArray();
+        $chartRevenue = $chartData->pluck('revenue')->toArray();
+
+        return view('dashboard', compact(
             'totalProduk',
             'totalCustomer',
             'totalInvoice',
@@ -136,7 +154,10 @@ class HomeController extends Controller
             'transaksisBulanIni',
             'pendapatanBulanIni',
             'produkStokRendah',
-            'stokProduk'
+            'stokProduk',
+            'chartDates',
+            'chartTotals',
+            'chartRevenue'
         ));
     }
 }
