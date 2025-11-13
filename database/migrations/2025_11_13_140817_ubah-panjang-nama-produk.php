@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('invoice', function (Blueprint $table) {
-            $table->dropColumn(['bukti_pembayaran']);
-            $table->string('snap_token')->nullable();
+        Schema::table('produk', function (Blueprint $table) {
+            $table->string('nama', 200)->change();
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('invoice', function (Blueprint $table) {
-            $table->text('bukti_pembayaran')->nullable();
-            $table->dropColumn('snap_token');
+        Schema::table('produk', function (Blueprint $table) {
+            $table->string('nama', 25)->change();
         });
     }
 };
