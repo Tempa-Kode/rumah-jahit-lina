@@ -316,6 +316,12 @@ class ShoppingCart {
                 productData.jenis_id = parseInt(jenisCheckbox.value);
                 productData.jenis_nama =
                     jenisCheckbox.getAttribute("data-jenis-nama");
+                // Update harga dengan harga jenis produk jika ada
+                const jenisHarga =
+                    jenisCheckbox.getAttribute("data-jenis-harga");
+                if (jenisHarga) {
+                    productData.harga = parseInt(jenisHarga);
+                }
             } else {
                 // Legacy support for select element
                 const jenisSelect = document.querySelector(".select-color");

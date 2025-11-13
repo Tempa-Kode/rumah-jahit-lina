@@ -13,6 +13,9 @@ class JenisProduk extends Model
     protected $fillable = [
         'produk_id',
         'nama',
+        'warna',
+        'ukuran',
+        'harga',
         'path_gambar',
         'jumlah_produk',
     ];

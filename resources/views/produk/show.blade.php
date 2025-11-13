@@ -1,6 +1,6 @@
-@extends('template-dashboard')
-@section('title', 'Detail Produk')
-@section('main')
+@extends("template-dashboard")
+@section("title", "Detail Produk")
+@section("main")
     <div class="row">
         <div class="section-description section-description-inline">
             <h1>Data Produk</h1>
@@ -71,7 +71,7 @@
             <div class="d-flex flex-wrap gap-3">
                 @forelse($produk->gambarProduk as $gambar)
                     <img src="{{ asset($gambar->path_gambar) }}" alt="{{ $produk->nama }}"
-                         class="w-25 h-150-px rounded object-fit-cover border">
+                        class="w-25 h-150-px rounded object-fit-cover border">
                 @empty
                     <p class="text-secondary-light">Tidak ada gambar</p>
                 @endforelse
@@ -92,9 +92,17 @@
                             <div class="card-body">
                                 @if ($jenis->path_gambar)
                                     <img src="{{ asset($jenis->path_gambar) }}" alt="{{ $jenis->nama }}"
-                                         class="w-100 h-150-px rounded object-fit-cover mb-3">
+                                        class="w-100 h-150-px rounded object-fit-cover mb-3">
                                 @endif
                                 <h6 class="fw-semibold mb-2">{{ $jenis->nama }}</h6>
+                                @if ($jenis->warna)
+                                    <p class="mb-1"><small><strong>Warna:</strong> {{ $jenis->warna }}</small></p>
+                                @endif
+                                @if ($jenis->ukuran)
+                                    <p class="mb-1"><small><strong>Ukuran:</strong> {{ $jenis->ukuran }}</small></p>
+                                @endif
+                                <p class="mb-2"><strong class="text-success">Harga: Rp
+                                        {{ number_format($jenis->harga, 0, ",", ".") }}</strong></p>
                                 <span class="badge badge-warning text-white px-3 py-2">
                                     Stok: {{ $jenis->jumlah_produk }}
                                 </span>
@@ -116,11 +124,11 @@
             <h6 class="fw-bold mb-0 card-title">Riwayat Stok Produk</h6>
             <div class="d-flex gap-2">
                 <a href="{{ route("produk.riwayat-stok.print", $produk->id_produk) }}" target="_blank"
-                   class="btn btn-sm btn-success radius-8">
+                    class="btn btn-sm btn-success radius-8">
                     Cetak PDF
                 </a>
                 <button type="button" class="btn btn-sm btn-primary radius-8" data-bs-toggle="modal"
-                        data-bs-target="#tambahStokModal">
+                    data-bs-target="#tambahStokModal">
                     Tambah Stok
                 </button>
             </div>
@@ -129,62 +137,62 @@
             <div class="table-responsive">
                 <table class="table bordered-table sm-table mb-0">
                     <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Produk</th>
-                        <th>Jenis</th>
-                        <th>Stok Awal</th>
-                        <th>Stok Masuk</th>
-                        <th>Stok Keluar</th>
-                        <th>Stok Akhir</th>
-                    </tr>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Produk</th>
+                            <th>Jenis</th>
+                            <th>Stok Awal</th>
+                            <th>Stok Masuk</th>
+                            <th>Stok Keluar</th>
+                            <th>Stok Akhir</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    @php
-                        // Group riwayat by tanggal dan jenis_produk_id
-                        $riwayatGrouped = $produk
-                            ->riwayatStokProduk()
-                            ->orderBy("tanggal", "desc")
-                            ->orderBy("created_at", "desc")
-                            ->get()
-                            ->groupBy(function ($item) {
-                                return $item->tanggal . "_" . ($item->jenis_produk_id ?? "utama");
-                            });
-                    @endphp
-
-                    @forelse($riwayatGrouped as $key => $riwayatItems)
                         @php
-                            // Urutkan items berdasarkan created_at (transaksi tertua dulu)
-                            $sortedItems = $riwayatItems->sortBy("created_at");
-
-                            $firstItem = $sortedItems->first(); // Transaksi pertama (tertua)
-                            $lastItem = $sortedItems->last(); // Transaksi terakhir (terbaru)
-
-                            $totalMasuk = $sortedItems->sum("stok_masuk");
-                            $totalKeluar = $sortedItems->sum("stok_keluar");
-
-                            // Stok awal dari transaksi pertama
-                            $stokAwal = $firstItem->stok_awal;
-                            // Stok akhir dari transaksi terakhir
-                            $stokAkhir = $lastItem->stok_akhir;
+                            // Group riwayat by tanggal dan jenis_produk_id
+                            $riwayatGrouped = $produk
+                                ->riwayatStokProduk()
+                                ->orderBy("tanggal", "desc")
+                                ->orderBy("created_at", "desc")
+                                ->get()
+                                ->groupBy(function ($item) {
+                                    return $item->tanggal . "_" . ($item->jenis_produk_id ?? "utama");
+                                });
                         @endphp
-                        <tr>
-                            <td>{{ $firstItem->tanggal }}</td>
-                            <td>{{ $produk->nama }}</td>
-                            <td>{{ $firstItem->jenis_produk_id ? $firstItem->jenisProduk->nama : "Produk Utama" }}
-                            </td>
-                            <td>{{ $stokAwal }}</td>
-                            <td class="text-success">+{{ $totalMasuk }}</td>
-                            <td class="text-danger">-{{ $totalKeluar }}</td>
-                            <td class="fw-bold">{{ $stokAkhir }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center text-secondary-light">
-                                Tidak ada riwayat stok
-                            </td>
-                        </tr>
-                    @endforelse
+
+                        @forelse($riwayatGrouped as $key => $riwayatItems)
+                            @php
+                                // Urutkan items berdasarkan created_at (transaksi tertua dulu)
+                                $sortedItems = $riwayatItems->sortBy("created_at");
+
+                                $firstItem = $sortedItems->first(); // Transaksi pertama (tertua)
+                                $lastItem = $sortedItems->last(); // Transaksi terakhir (terbaru)
+
+                                $totalMasuk = $sortedItems->sum("stok_masuk");
+                                $totalKeluar = $sortedItems->sum("stok_keluar");
+
+                                // Stok awal dari transaksi pertama
+                                $stokAwal = $firstItem->stok_awal;
+                                // Stok akhir dari transaksi terakhir
+                                $stokAkhir = $lastItem->stok_akhir;
+                            @endphp
+                            <tr>
+                                <td>{{ $firstItem->tanggal }}</td>
+                                <td>{{ $produk->nama }}</td>
+                                <td>{{ $firstItem->jenis_produk_id ? $firstItem->jenisProduk->nama : "Produk Utama" }}
+                                </td>
+                                <td>{{ $stokAwal }}</td>
+                                <td class="text-success">+{{ $totalMasuk }}</td>
+                                <td class="text-danger">-{{ $totalKeluar }}</td>
+                                <td class="fw-bold">{{ $stokAkhir }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary-light">
+                                    Tidak ada riwayat stok
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -207,8 +215,7 @@
     </div>
 
     <!-- Modal Tambah Stok -->
-    <div class="modal fade" id="tambahStokModal" tabindex="-1" aria-labelledby="tambahStokModalLabel"
-         aria-hidden="true">
+    <div class="modal fade" id="tambahStokModal" tabindex="-1" aria-labelledby="tambahStokModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -230,8 +237,7 @@
                         </div>
 
                         <div class="mb-20">
-                            <label for="jenis_produk_id"
-                                   class="form-label fw-semibold text-primary-light text-sm mb-8">
+                            <label for="jenis_produk_id" class="form-label fw-semibold text-primary-light text-sm mb-8">
                                 Pilih Produk
                             </label>
                             <select class="form-select radius-8" id="jenis_produk_id" name="jenis_produk_id">
@@ -249,7 +255,7 @@
                                 Jumlah <span class="text-danger-600">*</span>
                             </label>
                             <input type="number" class="form-control radius-8" id="jumlah" name="jumlah"
-                                   placeholder="Masukkan jumlah stok" min="1" required>
+                                placeholder="Masukkan jumlah stok" min="1" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -262,7 +268,7 @@
     </div>
 @endsection
 
-@push('script')
+@push("script")
     @if (session("success_stok"))
         <script>
             Swal.fire({

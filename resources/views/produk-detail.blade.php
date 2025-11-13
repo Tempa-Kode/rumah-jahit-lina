@@ -103,7 +103,7 @@
                         <!-- Product Infor -->
                         <div class="tf-product-info-wrap bg-white position-relative">
                             {{-- <div class="tf-zoom-main"></div> --}}
-                            <div class="tf-product-info-list style-2 justify-content-xl-end">
+                            <div class="tf-product-info-content">
                                 <div class="tf-product-info-content">
                                     <div class="infor-heading">
                                         <p class="caption">Kategori:
@@ -113,7 +113,7 @@
                                             </a>
                                         </p>
                                         <h5 class="product-info-name fw-semibold">
-                                            {{ $produk->nama }}
+                                            {{ $produk->nama }}<span id="selected-jenis-name" class="text-primary"></span>
                                         </h5>
                                         <span class="body-text-3 caption text-muted">
                                             <strong class="text-success">{{ $produk->totalTerjual }}</strong>
@@ -127,7 +127,7 @@
                                         </div>
                                     </div>
                                     <div class="">
-                                        <div class="tf-product-info-choose-option flex-xl-nowrap">
+                                        <div class="tf-product-info-choose-option sticky-top">
                                             <div class="product-quantity">
                                                 <p class=" title body-text-3">
                                                     Jumlah
@@ -146,7 +146,7 @@
                                             @if ($produk->jenisProduk->count() > 0)
                                                 <div class="product-color">
                                                     <p class=" title body-text-3">
-                                                        Jenis
+                                                        Jenis/Variasi
                                                     </p>
                                                     <div class="tf-select-color">
                                                         @foreach ($produk->jenisProduk as $jenis)
@@ -154,11 +154,28 @@
                                                                 id="jenis-{{ $jenis->id_jenis_produk }}"
                                                                 value="{{ $jenis->id_jenis_produk }}"
                                                                 data-jenis-nama="{{ $jenis->nama }}"
+                                                                data-jenis-harga="{{ $jenis->harga }}"
+                                                                data-jenis-warna="{{ $jenis->warna }}"
+                                                                data-jenis-ukuran="{{ $jenis->ukuran }}"
                                                                 {{ $jenis->id_jenis_produk == $produk->jenisProdukTerpilih ? "checked" : "" }}
                                                                 autocomplete="off">
                                                             <label class="btn btn-outline-primary"
                                                                 for="jenis-{{ $jenis->id_jenis_produk }}">
                                                                 {{ $jenis->nama }}
+                                                                @if ($jenis->warna || $jenis->ukuran)
+                                                                    <br><small class="text-muted">
+                                                                        @if ($jenis->warna)
+                                                                            {{ $jenis->warna }}
+                                                                        @endif
+                                                                        @if ($jenis->warna && $jenis->ukuran)
+                                                                            -
+                                                                        @endif
+                                                                        @if ($jenis->ukuran)
+                                                                            {{ $jenis->ukuran }}
+                                                                        @endif
+                                                                    </small>
+                                                                @endif
+                                                                {{-- <br><small class="text-success fw-bold">Rp {{ number_format($jenis->harga, 0, ',', '.') }}</small> --}}
                                                             </label>
                                                         @endforeach
                                                     </div>
@@ -232,6 +249,48 @@
                     }
                 }
 
+                // Fungsi untuk update harga berdasarkan jenis yang dipilih
+                function updatePrice() {
+                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
+                    const priceElement = document.querySelector('.product-info-price h4');
+
+                    if (selectedCheckbox && priceElement) {
+                        const jenisHarga = selectedCheckbox.getAttribute('data-jenis-harga');
+                        if (jenisHarga) {
+                            const formattedPrice = new Intl.NumberFormat('id-ID').format(jenisHarga);
+                            priceElement.textContent = 'Rp. ' + formattedPrice;
+                        }
+                    }
+                }
+
+                // Fungsi untuk update nama jenis di judul produk
+                function updateProductName() {
+                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
+                    const jenisNameElement = document.getElementById('selected-jenis-name');
+
+                    if (selectedCheckbox && jenisNameElement) {
+                        const jenisNama = selectedCheckbox.getAttribute('data-jenis-nama');
+                        const jenisWarna = selectedCheckbox.getAttribute('data-jenis-warna');
+                        const jenisUkuran = selectedCheckbox.getAttribute('data-jenis-ukuran');
+
+                        let displayText = ` - ${jenisNama}`;
+
+                        // if (jenisWarna && jenisUkuran) {
+                        //     displayText = ` - ${jenisWarna} ${jenisUkuran}`;
+                        // } else if (jenisWarna) {
+                        //     displayText = ` - ${jenisWarna}`;
+                        // } else if (jenisUkuran) {
+                        //     displayText = ` - ${jenisUkuran}`;
+                        // } else if (jenisNama) {
+                        //     displayText = ` - ${jenisNama}`;
+                        // }
+
+                        jenisNameElement.textContent = displayText;
+                    } else if (jenisNameElement) {
+                        jenisNameElement.textContent = '';
+                    }
+                }
+
                 // Fungsi untuk update gambar pada tombol keranjang
                 function updateCartImage() {
                     if (!btnAddToCart) return;
@@ -256,10 +315,15 @@
                         // Simpan jenis yang dipilih ke data attribute
                         btnAddToCart.setAttribute('data-product-jenis-id', selectedJenis.id);
                         btnAddToCart.setAttribute('data-product-jenis-nama', selectedJenis.nama);
+
+                        // Update harga dan nama produk
+                        updatePrice();
+                        updateProductName();
                     } else {
                         // Jika tidak ada jenis yang dipilih, gunakan gambar default (gambar produk pertama)
                         btnAddToCart.removeAttribute('data-product-jenis-id');
                         btnAddToCart.removeAttribute('data-product-jenis-nama');
+                        updateProductName();
                     }
                 }
 
@@ -327,8 +391,9 @@
                     });
                 }
 
-                // Update gambar saat halaman pertama kali dimuat (jika ada jenis terpilih)
+                // Update gambar dan nama saat halaman pertama kali dimuat (jika ada jenis terpilih)
                 updateCartImage();
+                updateProductName();
             });
         </script>
     @endpush

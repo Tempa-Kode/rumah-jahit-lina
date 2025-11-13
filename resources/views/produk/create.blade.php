@@ -1,6 +1,6 @@
-@extends('template-dashboard')
-@section('title', 'Tambah Data Produk')
-@section('main')
+@extends("template-dashboard")
+@section("title", "Tambah Data Produk")
+@section("main")
     <div class="container-fluid">
         <div class="row">
             <div class="section-description section-description-inline">
@@ -24,25 +24,25 @@
                                 <div class="col-sm-6 mb-2">
                                     <div class="mb-2">
                                         <label for="nama"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Nama Produk <span class="text-danger-600">*</span>
                                         </label>
                                         <input type="text"
-                                               class="form-control radius-8 @error("nama") is-invalid @enderror" id="nama"
-                                               name="nama" value="{{ old("nama") }}" placeholder="Masukkan nama produk">
+                                            class="form-control radius-8 @error("nama") is-invalid @enderror" id="nama"
+                                            name="nama" value="{{ old("nama") }}" placeholder="Masukkan nama produk">
                                         @error("nama")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="mb-2">
                                         <label for="kategori_id"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Kategori <span class="text-danger-600">*</span>
                                         </label>
                                         <select class="form-select radius-8 @error("kategori_id") is-invalid @enderror"
-                                                id="kategori_id" name="kategori_id">
+                                            id="kategori_id" name="kategori_id">
                                             <option value="">Pilih Kategori</option>
                                             @foreach ($kategoris as $kategori)
                                                 <option value="{{ $kategori->id_kategori }}"
@@ -52,50 +52,50 @@
                                             @endforeach
                                         </select>
                                         @error("kategori_id")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="mb-2">
                                         <label for="harga"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Harga <span class="text-danger-600">*</span>
                                         </label>
                                         <input type="number"
-                                               class="form-control radius-8 @error("harga") is-invalid @enderror"
-                                               id="harga" name="harga" value="{{ old("harga") }}"
-                                               placeholder="Masukkan harga" min="0" step="0.01">
+                                            class="form-control radius-8 @error("harga") is-invalid @enderror"
+                                            id="harga" name="harga" value="{{ old("harga") }}"
+                                            placeholder="Masukkan harga" min="0" step="0.01">
                                         @error("harga")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="mb-2">
                                         <label for="jumlah_produk"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Jumlah Stok
                                         </label>
                                         <input type="number"
-                                               class="form-control radius-8 @error("jumlah_produk") is-invalid @enderror"
-                                               id="jumlah_produk" name="jumlah_produk" value="{{ old("jumlah_produk") }}"
-                                               placeholder="Masukkan jumlah stok">
+                                            class="form-control radius-8 @error("jumlah_produk") is-invalid @enderror"
+                                            id="jumlah_produk" name="jumlah_produk" value="{{ old("jumlah_produk") }}"
+                                            placeholder="Masukkan jumlah stok">
                                         @error("jumlah_produk")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="col-sm-12">
                                     <div class="mb-2">
                                         <label for="keterangan"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Keterangan/Deskripsi
                                         </label>
                                         <textarea class="form-control radius-8 @error("keterangan") is-invalid @enderror" id="keterangan" name="keterangan"
-                                                  rows="3" placeholder="Masukkan keterangan produk">{{ old("keterangan") }}</textarea>
+                                            rows="3" placeholder="Masukkan keterangan produk">{{ old("keterangan") }}</textarea>
                                         @error("keterangan")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
@@ -109,14 +109,14 @@
                                 <div class="col-sm-12">
                                     <div class="mb-2">
                                         <label for="gambar_produk"
-                                               class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
                                             Upload Gambar (Multiple)
                                         </label>
                                         <input type="file"
-                                               class="form-control radius-8 @error("gambar_produk.*") is-invalid @enderror"
-                                               id="gambar_produk" name="gambar_produk[]" accept="image/*" multiple>
+                                            class="form-control radius-8 @error("gambar_produk.*") is-invalid @enderror"
+                                            id="gambar_produk" name="gambar_produk[]" accept="image/*" multiple>
                                         @error("gambar_produk.*")
-                                        <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                         <small class="text-secondary-light">Format: JPG, JPEG, PNG. Max: 2MB per
                                             file</small>
@@ -158,7 +158,7 @@
     </div>
 @endsection
 
-@push('script')
+@push("script")
     <script>
         $(document).ready(function() {
             let jenisIndex = 0;
@@ -196,7 +196,25 @@
                                 <div class="col-sm-4">
                                     <div class="mb-2">
                                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Nama Jenis</label>
-                                        <input type="text" class="form-control radius-8" name="jenis_nama[]" placeholder="Contoh: Warna Merah">
+                                        <input type="text" class="form-control radius-8" name="jenis_nama[]" placeholder="Contoh: Ukuran L Merah">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Warna</label>
+                                        <input type="text" class="form-control radius-8" name="jenis_warna[]" placeholder="Contoh: Merah">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Ukuran</label>
+                                        <input type="text" class="form-control radius-8" name="jenis_ukuran[]" placeholder="Contoh: L, XL">
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="mb-2">
+                                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Harga <span class="text-danger-600">*</span></label>
+                                        <input type="number" class="form-control radius-8" name="jenis_harga[]" placeholder="0" min="0">
                                     </div>
                                 </div>
                                 <div class="col-sm-4">

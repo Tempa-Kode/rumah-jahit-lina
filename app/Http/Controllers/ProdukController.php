@@ -45,6 +45,9 @@ class ProdukController extends Controller
             'jumlah_produk' => 'nullable|integer|min:0',
             'gambar_produk.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'jenis_nama.*' => 'nullable|string|max:255',
+            'jenis_warna.*' => 'nullable|string|max:20',
+            'jenis_ukuran.*' => 'nullable|string|max:20',
+            'jenis_harga.*' => 'nullable|integer|min:0',
             'jenis_gambar.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'jenis_jumlah.*' => 'nullable|integer|min:0',
         ]);
@@ -80,6 +83,9 @@ class ProdukController extends Controller
                         $jenisData = [
                             'produk_id' => $produk->id_produk,
                             'nama' => $jenisNama,
+                            'warna' => $request->jenis_warna[$index] ?? null,
+                            'ukuran' => $request->jenis_ukuran[$index] ?? null,
+                            'harga' => $request->jenis_harga[$index] ?? 0,
                             'jumlah_produk' => $request->jenis_jumlah[$index] ?? 0,
                         ];
 
@@ -165,9 +171,15 @@ class ProdukController extends Controller
             // Jenis Existing
             'jenis_existing_id.*' => 'nullable|exists:jenis_produk,id_jenis_produk',
             'jenis_existing_nama.*' => 'nullable|string|max:255',
+            'jenis_existing_warna.*' => 'nullable|string|max:20',
+            'jenis_existing_ukuran.*' => 'nullable|string|max:20',
+            'jenis_existing_harga.*' => 'nullable|integer|min:0',
             'jenis_existing_jumlah.*' => 'nullable|integer|min:0',
             // Jenis Baru
             'jenis_nama.*' => 'nullable|string|max:255',
+            'jenis_warna.*' => 'nullable|string|max:20',
+            'jenis_ukuran.*' => 'nullable|string|max:20',
+            'jenis_harga.*' => 'nullable|integer|min:0',
             'jenis_gambar.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'jenis_jumlah.*' => 'nullable|integer|min:0',
         ]);
@@ -207,6 +219,9 @@ class ProdukController extends Controller
 
                         $updateData = [
                             'nama' => $request->jenis_existing_nama[$index],
+                            'warna' => $request->jenis_existing_warna[$index] ?? null,
+                            'ukuran' => $request->jenis_existing_ukuran[$index] ?? null,
+                            'harga' => $request->jenis_existing_harga[$index] ?? 0,
                             'jumlah_produk' => $stokBaruJenis,
                         ];
 
@@ -250,6 +265,9 @@ class ProdukController extends Controller
                     if (!empty($jenisNama)) {
                         $jenisData = [
                             'nama' => $jenisNama,
+                            'warna' => $request->jenis_warna[$index] ?? null,
+                            'ukuran' => $request->jenis_ukuran[$index] ?? null,
+                            'harga' => $request->jenis_harga[$index] ?? 0,
                             'jumlah_produk' => $request->jenis_jumlah[$index] ?? 0,
                         ];
 
