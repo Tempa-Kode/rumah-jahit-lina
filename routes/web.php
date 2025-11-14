@@ -34,7 +34,15 @@ Route::middleware('auth')->group(function () {
     Route::put('profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    Route::resource('admin', App\Http\Controllers\AdminController::class);
+    // Route::resource('admin', App\Http\Controllers\AdminController::class);
+    Route::prefix('data-admin')->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+        Route::get('/create', [App\Http\Controllers\AdminController::class, 'create'])->name('admin.create');
+        Route::post('/', [App\Http\Controllers\AdminController::class, 'store'])->name('admin.store');
+        Route::get('/{id}/edit', [App\Http\Controllers\AdminController::class, 'edit'])->name('admin.edit');
+        Route::put('/{id}', [App\Http\Controllers\AdminController::class, 'update'])->name('admin.update');
+        Route::delete('/{id}', [App\Http\Controllers\AdminController::class, 'destroy'])->name('admin.destroy');
+    });
     Route::resource('karyawan', App\Http\Controllers\KaryawanController::class);
     Route::resource('customer', App\Http\Controllers\CustomerController::class);
     Route::resource('kategori', App\Http\Controllers\KategoriController::class);
