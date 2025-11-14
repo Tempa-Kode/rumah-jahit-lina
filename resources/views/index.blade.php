@@ -22,6 +22,7 @@
     <!-- /Breakcrumbs -->
 
     <div class="tf-product-view-content wrapper-control-shop">
+
         <div class="canvas-filter-product sidebar-filter handle-canvas left">
             <div class="canvas-wrapper">
                 <div class="canvas-header d-flex d-xl-none">
@@ -58,6 +59,15 @@
             </div>
         </div>
         <div class="content-area">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="tf-shop-control flex-wrap gap-10">
                 <div class="d-flex align-items-center gap-10 w-100">
                     <button id="filterShop" class="tf-btn-filter d-flex d-xl-none">

@@ -16,7 +16,6 @@ class AuthController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'no_hp' => ['required', 'string', 'max:20', 'unique:users,no_hp'],
-            'alamat' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
@@ -25,7 +24,6 @@ class AuthController extends Controller
             'username' => $validated['username'],
             'email' => $validated['email'],
             'no_hp' => $validated['no_hp'],
-            'alamat' => $validated['alamat'],
             'password' => bcrypt($validated['password']),
             'role' => 'customer',
         ]);

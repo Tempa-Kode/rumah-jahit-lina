@@ -5,16 +5,6 @@
             <div class="modal-log-wrap list-file-delete">
                 <h5 class="title fw-semibold">Daftar Akun Customer</h5>
 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
                 @if (session("register_success"))
                     <div class="alert alert-success">
                         {{ session("register_success") }}
@@ -56,12 +46,12 @@
                                 value="{{ old("no_hp") }}" required>
                         </fieldset>
 
-                        <fieldset class="mb-3">
+                        {{-- <fieldset class="mb-3">
                             <label class="fw-semibold body-md-2">
                                 Alamat *
                             </label>
                             <textarea name="alamat" placeholder="Masukkan alamat lengkap" rows="3" required>{{ old("alamat") }}</textarea>
-                        </fieldset>
+                        </fieldset> --}}
 
                         <fieldset class="mb-3">
                             <label class="fw-semibold body-md-2">
