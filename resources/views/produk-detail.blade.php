@@ -119,6 +119,21 @@
                                             <strong class="text-success">{{ $produk->totalTerjual }}</strong>
                                             Terjual
                                         </span>
+                                        {{-- Sisa Stok --}}
+                                        @php
+                                            $initialStock = $produk->jumlah_produk ?? 0;
+                                            if ($produk->jenisProduk->count() > 0) {
+                                                $selected = $produk->jenisProduk->firstWhere(
+                                                    "id_jenis_produk",
+                                                    $produk->jenisProdukTerpilih,
+                                                );
+                                                if ($selected) {
+                                                    $initialStock = $selected->jumlah_produk ?? $initialStock;
+                                                }
+                                            }
+                                        @endphp
+                                        <p class="caption">Sisa Stok: <strong id="stock-count">{{ $initialStock }}</strong>
+                                        </p>
                                     </div>
                                     <div class="infor-center">
                                         <div class="product-info-price">
@@ -157,6 +172,7 @@
                                                                 data-jenis-harga="{{ $jenis->harga }}"
                                                                 data-jenis-warna="{{ $jenis->warna }}"
                                                                 data-jenis-ukuran="{{ $jenis->ukuran }}"
+                                                                data-jenis-jumlah="{{ $jenis->jumlah_produk }}"
                                                                 {{ $jenis->id_jenis_produk == $produk->jenisProdukTerpilih ? "checked" : "" }}
                                                                 autocomplete="off">
                                                             <label class="btn btn-outline-primary"
@@ -190,6 +206,7 @@
                                                         data-product-harga="{{ $produk->harga }}"
                                                         data-product-gambar="{{ $produk->gambarProduk->first() ? asset($produk->gambarProduk->first()->path_gambar) : asset("home/images/no-image.png") }}"
                                                         data-product-kategori="{{ $produk->kategori->nama }}"
+                                                        data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
                                                         data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}">
                                                         Tambah Keranjang
                                                         <i class="icon-cart-2"></i>
@@ -263,6 +280,27 @@
                     }
                 }
 
+                // Fungsi untuk update sisa stok berdasarkan jenis yang dipilih atau produk utama
+                function updateStock() {
+                    const stockElement = document.getElementById('stock-count');
+                    if (!stockElement) return;
+
+                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
+                    let stok = null;
+
+                    if (selectedCheckbox) {
+                        stok = selectedCheckbox.getAttribute('data-jenis-jumlah');
+                    } else if (btnAddToCart) {
+                        stok = btnAddToCart.getAttribute('data-product-jumlah');
+                    }
+
+                    if (stok === null || stok === undefined) {
+                        stok = 0;
+                    }
+
+                    stockElement.textContent = stok;
+                }
+
                 // Fungsi untuk update nama jenis di judul produk
                 function updateProductName() {
                     const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
@@ -319,11 +357,13 @@
                         // Update harga dan nama produk
                         updatePrice();
                         updateProductName();
+                        updateStock();
                     } else {
                         // Jika tidak ada jenis yang dipilih, gunakan gambar default (gambar produk pertama)
                         btnAddToCart.removeAttribute('data-product-jenis-id');
                         btnAddToCart.removeAttribute('data-product-jenis-nama');
                         updateProductName();
+                        updateStock();
                     }
                 }
 
