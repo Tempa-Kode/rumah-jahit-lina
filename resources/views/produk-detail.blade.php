@@ -299,6 +299,67 @@
                     }
 
                     stockElement.textContent = stok;
+
+                    // update quantity controls (buttons and input) based on stok
+                    updateQuantityControls(parseInt(stok || 0, 10));
+                }
+
+                // Helper: ambil stok yang tersedia (number)
+                function getAvailableStock() {
+                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
+                    if (selectedCheckbox) {
+                        return parseInt(selectedCheckbox.getAttribute('data-jenis-jumlah') || 0, 10);
+                    }
+                    if (btnAddToCart) {
+                        return parseInt(btnAddToCart.getAttribute('data-product-jumlah') || 0, 10);
+                    }
+                    return 0;
+                }
+
+                // Update controls: enable/disable increase/decrease, clamp quantity, manage add-to-cart
+                function updateQuantityControls(stock) {
+                    const qtyInput = document.querySelector('.quantity-product');
+                    const btnInc = document.querySelector('.btn-increase');
+                    const btnDec = document.querySelector('.btn-decrease');
+
+                    if (!qtyInput) return;
+
+                    let val = parseInt(qtyInput.value, 10);
+                    if (isNaN(val) || val < 1) val = 1;
+
+                    if (stock <= 0) {
+                        // jika stok habis, tampilkan 0. Keep increase button clickable so we can show alert.
+                        qtyInput.value = 0;
+                        if (btnDec) btnDec.disabled = true;
+                        if (btnAddToCart) {
+                            btnAddToCart.style.pointerEvents = 'none';
+                            btnAddToCart.style.opacity = '0.6';
+                            btnAddToCart.setAttribute('aria-disabled', 'true');
+                            // ubah teks sementara untuk memberi tahu habis
+                            btnAddToCart.dataset._originalText = btnAddToCart.textContent.trim();
+                            btnAddToCart.textContent = 'Habis';
+                        }
+                        return;
+                    }
+
+                    // jika stok ada, pastikan qty tidak lebih dari stok
+                    if (val > stock) val = stock;
+                    qtyInput.value = val;
+
+                    // Keep increase clickable to allow showing an alert when at max
+                    if (btnInc) btnInc.disabled = false;
+                    if (btnDec) btnDec.disabled = (val <= 1);
+
+                    if (btnAddToCart) {
+                        btnAddToCart.style.pointerEvents = '';
+                        btnAddToCart.style.opacity = '';
+                        btnAddToCart.removeAttribute('aria-disabled');
+                        if (btnAddToCart.dataset._originalText) {
+                            // restore original label if sebelumnya diubah
+                            btnAddToCart.textContent = btnAddToCart.dataset._originalText;
+                            delete btnAddToCart.dataset._originalText;
+                        }
+                    }
                 }
 
                 // Fungsi untuk update nama jenis di judul produk
@@ -405,6 +466,56 @@
                     });
                 });
 
+                // Quantity controls: increase / decrease / manual input
+                const qtyInput = document.querySelector('.quantity-product');
+                const btnInc = document.querySelector('.btn-increase');
+                const btnDec = document.querySelector('.btn-decrease');
+
+                if (btnInc) {
+                    btnInc.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const stock = getAvailableStock();
+                        let val = parseInt(qtyInput.value, 10) || 1;
+                        if (val < stock) {
+                            val += 1;
+                            qtyInput.value = val;
+                        } else {
+                            alert('Stok tidak cukup. Sisa stok: ' + stock);
+                        }
+                        updateQuantityControls(stock);
+                    });
+                }
+
+                if (btnDec) {
+                    btnDec.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        let val = parseInt(qtyInput.value, 10) || 1;
+                        if (val > 1) {
+                            val -= 1;
+                            qtyInput.value = val;
+                        }
+                        updateQuantityControls(getAvailableStock());
+                    });
+                }
+
+                if (qtyInput) {
+                    qtyInput.addEventListener('input', function() {
+                        // hanya angka
+                        const cleaned = this.value.replace(/\D/g, '');
+                        let val = parseInt(cleaned, 10) || 1;
+                        const stock = getAvailableStock();
+                        if (val > stock) {
+                            this.value = stock;
+                            alert('Jumlah melebihi stok tersedia. Sisa stok: ' + stock);
+                        } else if (val < 1) {
+                            this.value = 1;
+                        } else {
+                            this.value = val;
+                        }
+                        updateQuantityControls(stock);
+                    });
+                }
+
                 // Klik pada thumbnail -> pilih jenis jika slide punya data-jenis-id
                 const thumbsContainer = document.querySelector('.tf-product-media-thumbs');
                 if (thumbsContainer) {
@@ -434,6 +545,33 @@
                 // Update gambar dan nama saat halaman pertama kali dimuat (jika ada jenis terpilih)
                 updateCartImage();
                 updateProductName();
+
+                // ensure quantity controls reflect initial stock on load
+                updateStock();
+
+                // Intercept add-to-cart to validate stock before opening cart offcanvas
+                if (btnAddToCart) {
+                    btnAddToCart.addEventListener('click', function(e) {
+                        const stock = getAvailableStock();
+                        const qty = parseInt(document.querySelector('.quantity-product').value, 10) || 0;
+                        if (stock <= 0) {
+                            e.preventDefault();
+                            alert('Stok produk habis.');
+                            return;
+                        }
+                        if (qty <= 0) {
+                            e.preventDefault();
+                            alert('Jumlah minimal adalah 1.');
+                            return;
+                        }
+                        if (qty > stock) {
+                            e.preventDefault();
+                            alert('Jumlah yang dipilih melebihi sisa stok (' + stock + ').');
+                            return;
+                        }
+                        // otherwise allow add-to-cart to proceed (offcanvas)
+                    });
+                }
             });
         </script>
     @endpush
