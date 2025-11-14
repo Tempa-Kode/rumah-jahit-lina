@@ -212,6 +212,18 @@
                                                         <i class="icon-cart-2"></i>
                                                     </a>
                                                 </div>
+                                                {{-- Tombol Beli Langsung --}}
+                                                <div class="product-box-btn mt-2">
+                                                    <button type="button" class="btn btn-warning w-100 btn-buy-now"
+                                                        data-product-id="{{ $produk->id_produk }}"
+                                                        data-product-nama="{{ $produk->nama }}"
+                                                        data-product-harga="{{ $produk->harga }}"
+                                                        data-product-gambar="{{ $produk->gambarProduk->first() ? asset($produk->gambarProduk->first()->path_gambar) : asset("home/images/no-image.png") }}"
+                                                        data-product-kategori="{{ $produk->kategori->nama }}"
+                                                        data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}">
+                                                        Beli Sekarang
+                                                    </button>
+                                                </div>
                                             @endauth
                                         </div>
                                     </div>
@@ -570,6 +582,63 @@
                             return;
                         }
                         // otherwise allow add-to-cart to proceed (offcanvas)
+                    });
+                }
+
+                // Buy Now: langsung ke checkout dengan satu item di cart (localStorage)
+                const btnBuyNow = document.querySelector('.btn-buy-now');
+                if (btnBuyNow) {
+                    btnBuyNow.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        const stock = getAvailableStock();
+                        let qty = parseInt(document.querySelector('.quantity-product').value, 10) || 1;
+
+                        if (stock <= 0) {
+                            alert('Stok produk habis.');
+                            return;
+                        }
+                        if (qty <= 0) {
+                            alert('Jumlah minimal adalah 1.');
+                            return;
+                        }
+                        if (qty > stock) {
+                            alert('Jumlah yang dipilih melebihi sisa stok (' + stock + ').');
+                            qty = stock;
+                            document.querySelector('.quantity-product').value = qty;
+                            updateQuantityControls(stock);
+                            return;
+                        }
+
+                        // Build product object same shape as cart.js expects
+                        const product = {
+                            id: parseInt(btnBuyNow.dataset.productId),
+                            nama: btnBuyNow.dataset.productNama,
+                            harga: parseInt(btnBuyNow.dataset.productHarga),
+                            gambar: btnBuyNow.dataset.productGambar,
+                            kategori: btnBuyNow.dataset.productKategori,
+                            quantity: qty,
+                            jenis_id: null,
+                            jenis_nama: null,
+                        };
+
+                        // If a variant is selected, include it and adjust price if variant has price
+                        const selectedJenis = document.querySelector('.jenis-checkbox:checked');
+                        if (selectedJenis) {
+                            product.jenis_id = parseInt(selectedJenis.value);
+                            product.jenis_nama = selectedJenis.getAttribute('data-jenis-nama');
+                            const jenisHarga = selectedJenis.getAttribute('data-jenis-harga');
+                            if (jenisHarga) product.harga = parseInt(jenisHarga);
+                        }
+
+                        // Save single-item cart to localStorage and redirect to checkout
+                        try {
+                            localStorage.setItem('ria_shopping_cart', JSON.stringify([product]));
+                            window.location.href = '{{ route("checkout") }}';
+                        } catch (err) {
+                            console.error('Gagal menyimpan cart ke localStorage', err);
+                            alert('Terjadi kesalahan saat memproses pembelian. Coba lagi.');
+                        }
                     });
                 }
             });
