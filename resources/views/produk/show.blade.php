@@ -142,8 +142,8 @@
                             <th>Produk</th>
                             <th>Jenis</th>
                             <th>Stok Awal</th>
-                            <th>Stok Masuk</th>
-                            <th>Stok Keluar</th>
+                            <th>Produk Masuk</th>
+                            <th>Produk Keluar</th>
                             <th>Stok Akhir</th>
                         </tr>
                     </thead>
