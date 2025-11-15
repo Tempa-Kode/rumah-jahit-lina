@@ -52,9 +52,13 @@
                                 {{ $produk->jenisProduk->sum("jumlah_produk") }})
                             </small>
                         </div>
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="fw-bold text-secondary-light mb-2">Keterangan:</label>
                             <p class="mb-0">{{ $produk->keterangan ?? "-" }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold text-secondary-light mb-2">Minimal Pembelian:</label>
+                            <p class="mb-0">{{ $produk->min_beli ?? "-" }} Item</p>
                         </div>
                     </div>
                 </div>

@@ -208,7 +208,9 @@
                                                         data-product-kategori="{{ $produk->kategori->nama }}"
                                                         data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
                                                         data-product-stok="{{ $initialStock }}"
-                                                        data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}">
+                                                        data-min-beli="{{ $produk->min_beli ?? 1 }}"
+                                                        data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}"
+                                                        onclick="minPembelian()">
                                                         Tambah Keranjang
                                                         <i class="icon-cart-2"></i>
                                                     </a>
@@ -221,7 +223,10 @@
                                                         data-product-harga="{{ $produk->harga }}"
                                                         data-product-gambar="{{ $produk->gambarProduk->first() ? asset($produk->gambarProduk->first()->path_gambar) : asset("home/images/no-image.png") }}"
                                                         data-product-kategori="{{ $produk->kategori->nama }}"
-                                                        data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}">
+                                                        data-product-stok="{{ $initialStock }}"
+                                                        data-min-beli="{{ $produk->min_beli ?? 1 }}"
+                                                        data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
+                                                        onclick="minPembelian()">
                                                         Beli Sekarang
                                                     </button>
                                                 </div>
@@ -643,6 +648,25 @@
                     });
                 }
             });
+
+            function minPembelian(){
+                const minBeli = document.querySelector('.btn-add-to-cart').getAttribute('data-min-beli');
+                const quantityInput = document.querySelector('.quantity-product');
+                let currentQty = parseInt(quantityInput.value, 10) || 1;
+                if(currentQty < minBeli){
+                    const ok = confirm('Jumlah pembelian minimal adalah ' + minBeli + '.\nTekan OK untuk melanjutkan pembelian, atau Batal untuk membatalkan.');
+                    if (ok) {
+                        quantityInput.value = minBeli;
+                        // perbarui kontrol & stok (jika ada fungsi pembantu)
+                        const stock = parseInt(document.getElementById('stock-count').textContent, 10) || 0;
+                        updateQuantityControls(stock);
+                        return true;
+                    } else {
+                        // user memilih Batal — biarkan saja agar mereka bisa ubah manual
+                        return false;
+                    }
+                }
+            }
         </script>
     @endpush
 @endsection

@@ -17,6 +17,7 @@ class Produk extends Model
         'harga',
         'keterangan',
         'jumlah_produk',
+        'min_beli',
     ];
 
     public function kategori() : BelongsTo

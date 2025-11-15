@@ -71,7 +71,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-4">
                                     <div class="mb-2">
                                         <label for="harga"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -86,7 +86,7 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-4">
                                     <div class="mb-2">
                                         <label for="jumlah_produk"
                                             class="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -98,6 +98,22 @@
                                             value="{{ old("jumlah_produk", $produk->jumlah_produk) }}"
                                             placeholder="Masukkan jumlah stok" readonly>
                                         @error("jumlah_produk")
+                                            <div class="text-danger-600 mt-2">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="mb-2">
+                                        <label for="min_beli"
+                                            class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            Minimal Pembelian
+                                        </label>
+                                        <input type="number"
+                                            class="form-control radius-8 @error("min_beli") is-invalid @enderror"
+                                            id="min_beli" name="min_beli"
+                                            value="{{ old("min_beli", $produk->min_beli) }}"
+                                            placeholder="Masukkan minimal pembelian">
+                                        @error("min_beli")
                                             <div class="text-danger-600 mt-2">{{ $message }}</div>
                                         @enderror
                                     </div>
