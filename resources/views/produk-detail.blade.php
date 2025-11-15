@@ -207,6 +207,7 @@
                                                         data-product-gambar="{{ $produk->gambarProduk->first() ? asset($produk->gambarProduk->first()->path_gambar) : asset("home/images/no-image.png") }}"
                                                         data-product-kategori="{{ $produk->kategori->nama }}"
                                                         data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
+                                                        data-product-stok="{{ $initialStock }}"
                                                         data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}">
                                                         Tambah Keranjang
                                                         <i class="icon-cart-2"></i>

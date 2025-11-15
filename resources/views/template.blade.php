@@ -108,7 +108,7 @@
                                             </a>
                                         </li>
                                         <li class="nav-cart">
-                                            <a href="#shoppingCart" data-bs-toggle="offcanvas"
+                                            <a href="{{ route('cart') }}"
                                                 class="link link-fill nav-icon-item relative">
                                                 <span>
                                                     <svg width="26" height="26" viewBox="0 0 26 26"
@@ -189,7 +189,7 @@
     @include("partials.register")
     <!-- /Register -->
     <!-- Shopping Cart -->
-    @include("partials.shopping-cart")
+    {{-- @include("partials.shopping-cart") --}}
     <!-- /Shopping Cart -->
 
     <!-- Javascript -->

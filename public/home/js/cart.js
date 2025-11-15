@@ -39,6 +39,12 @@ class ShoppingCart {
         if (existingItemIndex > -1) {
             // Update quantity if item exists
             cart[existingItemIndex].quantity += product.quantity;
+            // Update stok on existing item if provided
+            cart[existingItemIndex].stok =
+                product.stok ||
+                product.stock ||
+                cart[existingItemIndex].stok ||
+                0;
         } else {
             // Add new item
             cart.push({
@@ -50,6 +56,7 @@ class ShoppingCart {
                 kategori: product.kategori,
                 jenis_id: product.jenis_id || null,
                 jenis_nama: product.jenis_nama || null,
+                stok: product.stok || product.stock || 0,
             });
         }
 
@@ -188,10 +195,23 @@ class ShoppingCart {
                                         value="${item.quantity}"
                                         data-id="${item.id}"
                                         data-jenis="${item.jenis_id || ""}"
+                                        data-stock="${
+                                            item.stok || item.stock || 0
+                                        }"
                                         readonly>
                                     <button class="btn-quantity btn-increase-cart"
                                         data-id="${item.id}"
-                                        data-jenis="${item.jenis_id || ""}">
+                                        data-jenis="${item.jenis_id || ""}"
+                                        data-stock="${
+                                            item.stok || item.stock || 0
+                                        }"
+                                        ${
+                                            (item.stok || item.stock) &&
+                                            item.quantity >=
+                                                (item.stok || item.stock)
+                                                ? 'disabled style="opacity:.6;pointer-events:none"'
+                                                : ""
+                                        }>
                                         <i class="icon-plus"></i>
                                     </button>
                                 </div>
@@ -249,6 +269,14 @@ class ShoppingCart {
                 const input =
                     btn.parentElement.querySelector(".quantity-product");
                 const currentQty = parseInt(input.value);
+                const stock = parseInt(
+                    btn.dataset.stock || input.dataset.stock || 0,
+                    10
+                );
+                if (stock > 0 && currentQty + 1 > stock) {
+                    alert("Stok tidak cukup. Sisa stok: " + stock);
+                    return;
+                }
                 this.updateQuantity(id, jenisId, currentQty + 1);
             });
         });
@@ -273,6 +301,7 @@ class ShoppingCart {
     // Attach global event listeners
     attachEventListeners() {
         // Add to cart buttons
+        console.log("Attaching add to cart event listeners");
         document.querySelectorAll(".btn-add-to-cart").forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -292,6 +321,7 @@ class ShoppingCart {
             quantity: 1,
             jenis_id: null,
             jenis_nama: null,
+            stok: parseInt(btn.dataset.productStok) || 0,
         };
 
         // Get quantity from input
@@ -341,6 +371,28 @@ class ShoppingCart {
             console.log(
                 "Info: Produk memiliki varian, tapi tidak ada yang dipilih. Menggunakan stok utama produk."
             );
+        }
+
+        // Attach stock information to the cart item (prefer variant stock if present)
+        try {
+            let stock = 0;
+            if (productData.jenis_id) {
+                const jenisCheckbox = document.querySelector(
+                    ".jenis-checkbox:checked"
+                );
+                if (jenisCheckbox) {
+                    stock = parseInt(
+                        jenisCheckbox.getAttribute("data-jenis-jumlah") || 0,
+                        10
+                    );
+                }
+            }
+            if (!stock && btn.dataset.productJumlah) {
+                stock = parseInt(btn.dataset.productJumlah || 0, 10);
+            }
+            productData.stock = isNaN(stock) ? 0 : stock;
+        } catch (e) {
+            productData.stock = 0;
         }
 
         this.addToCart(productData);

@@ -138,10 +138,10 @@
                                     ${item.nama}
                                 </a>
                                 ${item.jenis_nama ? `
-                                        <div class="variant-box">
-                                            <p class="body-text-3">Jenis: ${item.jenis_nama}</p>
-                                        </div>
-                                        ` : ''}
+                                                <div class="variant-box">
+                                                    <p class="body-text-3">Jenis: ${item.jenis_nama}</p>
+                                                </div>
+                                                ` : ''}
                             </div>
                         </td>
                         <td data-cart-title="Harga" class="tf-cart-item_price">
@@ -151,11 +151,11 @@
                         </td>
                         <td data-cart-title="Jumlah" class="tf-cart-item_quantity">
                             <div class="wg-quantity">
-                                <span class="btn-quantity btn-decrease" onclick="updateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity - 1})">
+                                <span class="btn-quantity btn-decrease" onclick="attemptUpdateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity - 1}, ${item.stok || 0})">
                                     <i class="icon-minus"></i>
                                 </span>
-                                <input class="quantity-product" type="text" value="${item.quantity}" readonly>
-                                <span class="btn-quantity btn-increase" onclick="updateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity + 1})">
+                                <input class="quantity-product" type="text" value="${item.quantity}" readonly data-stock="${item.stock || 0}">
+                                <span class="btn-quantity btn-increase" onclick="attemptUpdateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity + 1}, ${item.stok || 0})" ${item.stok && item.quantity >= item.stok ? 'style="opacity:.6;pointer-events:none" disabled' : ''}>
                                     <i class="icon-plus"></i>
                                 </span>
                             </div>
@@ -179,6 +179,17 @@
 
                     cartGrandTotal.textContent = `Total: Rp. ${formatPrice(total)}`;
                 }
+            }
+
+            // Attempt to update cart qty but check stock first
+            function attemptUpdateCartQty(productId, jenisId, quantity, stock) {
+                // fallback: if stock is not provided (0), allow update
+                const available = (typeof stock === 'number' && stock > 0) ? stock : Infinity;
+                if (quantity > available) {
+                    alert('Jumlah yang dipilih melebihi sisa stok (' + (available === Infinity ? 0 : available) + ').');
+                    return;
+                }
+                updateCartQty(productId, jenisId, quantity);
             }
 
             function updateCartQty(productId, jenisId, quantity) {
