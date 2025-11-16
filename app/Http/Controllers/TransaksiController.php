@@ -123,8 +123,8 @@ class TransaksiController extends Controller
         $transaksi = Invoice::findOrFail($id);
 
         $validated = $request->validate([
-            'resi' => 'required|string|max:255',
-            'status_pengiriman' => 'required|boolean',
+            'resi' => 'nullable|string|max:255',
+            'status_pengiriman' => 'required|in:pending,dikirim,diterima,dibatalkan',
         ]);
 
         $transaksi->update($validated);

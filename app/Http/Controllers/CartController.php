@@ -97,7 +97,6 @@ class CartController extends Controller
                 'ongkir' => $ongkir,
                 'kurir' => $validated['kurir'],
                 'layanan_pengiriman' => $validated['layanan_ongkir'],
-                'status_pengiriman' => false,
             ]);
 
             // Create invoice items and update stock

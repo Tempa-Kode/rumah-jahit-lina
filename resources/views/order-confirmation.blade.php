@@ -143,11 +143,18 @@
                                     <tr>
                                         <td><strong>Status Pengiriman:</strong></td>
                                         <td>
-                                            @if ($invoice->status_pengiriman)
-                                                <span class="badge bg-success">Dikirim</span>
+                                            @if ($invoice->status_pengiriman == "dikirim")
+                                                <span class="badge bg-info">Dikirim</span>
                                                 @if ($invoice->resi)
                                                     <br><small>Resi: {{ $invoice->resi }}</small>
                                                 @endif
+                                            @elseif ($invoice->status_pengiriman == "diterima")
+                                                <span class="badge bg-success">Diterima</span>
+                                                @if ($invoice->resi)
+                                                    <br><small>Resi: {{ $invoice->resi }}</small>
+                                                @endif
+                                            @elseif ($invoice->status_pengiriman == "dibatalkan")
+                                                <span class="badge bg-danger">Dibatalkan</span>
                                             @else
                                                 <span class="badge bg-secondary">Belum Dikirim</span>
                                             @endif

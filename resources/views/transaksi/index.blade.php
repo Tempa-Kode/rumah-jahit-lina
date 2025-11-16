@@ -125,9 +125,20 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($transaksi->status_pengiriman)
-                                            <span class="badge badge-success text-sm fw-bold px-20 py-9 radius-4">
+                                        @php
+                                            $statusPengiriman = $transaksi->status_pengiriman;
+                                        @endphp
+                                        @if ($statusPengiriman === "dikirim")
+                                            <span class="badge badge-info text-sm fw-bold px-20 py-9 radius-4">
                                                 Sudah Dikirim
+                                            </span>
+                                        @elseif ($statusPengiriman === "diterima")
+                                            <span class="badge badge-success text-sm fw-bold px-20 py-9 radius-4">
+                                                Diterima
+                                            </span>
+                                        @elseif ($statusPengiriman === "dibatalkan")
+                                            <span class="badge badge-danger text-sm fw-bold px-20 py-9 radius-4">
+                                                Dibatalkan
                                             </span>
                                         @else
                                             <span

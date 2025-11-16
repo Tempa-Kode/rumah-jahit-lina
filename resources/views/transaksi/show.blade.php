@@ -153,9 +153,20 @@
                     </div>
                     <div class="mb-3">
                         <label class="fw-semibold text-secondary-light mb-2">Status Saat Ini:</label>
-                        @if ($transaksi->status_pengiriman)
+                        @php
+                            $statusPengiriman = $transaksi->status_pengiriman;
+                        @endphp
+                        @if ($statusPengiriman === "dikirim")
                             <span class="badge badge-success px-20 py-9 radius-4">
                                 Sudah Dikirim
+                            </span>
+                        @elseif ($statusPengiriman === "diterima")
+                            <span class="badge badge-primary px-20 py-9 radius-4">
+                                Diterima
+                            </span>
+                        @elseif ($statusPengiriman === "dibatalkan")
+                            <span class="badge badge-danger px-20 py-9 radius-4">
+                                Dibatalkan
                             </span>
                         @else
                             <span class="badge badge-warning px-20 py-9 radius-4">
@@ -172,7 +183,7 @@
                                 Nomor Resi <span class="text-danger-600">*</span>
                             </label>
                             <input type="text" class="form-control radius-8" name="resi"
-                                value="{{ $transaksi->resi }}" placeholder="Masukkan nomor resi" required>
+                                value="{{ $transaksi->resi }}" placeholder="Masukkan nomor resi">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -180,10 +191,14 @@
                             </label>
                             <select class="form-select radius-8" name="status_pengiriman" required>
                                 <option value="">Pilih Status</option>
-                                <option value="0" {{ !$transaksi->status_pengiriman ? "selected" : "" }}>
+                                <option value="pending" {{ $transaksi->status_pengiriman === "pending" ? "selected" : "" }}>
                                     Belum Dikirim</option>
-                                <option value="1" {{ $transaksi->status_pengiriman ? "selected" : "" }}>
+                                <option value="dikirim" {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
                                     Sudah Dikirim</option>
+                                <option value="diterima" {{ $transaksi->status_pengiriman === "diterima" ? "selected" : "" }}>
+                                    Diterima</option>
+                                <option value="dibatalkan" {{ $transaksi->status_pengiriman === "dibatalkan" ? "selected" : "" }}>
+                                    Dibatalkan</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-success w-100 radius-8">

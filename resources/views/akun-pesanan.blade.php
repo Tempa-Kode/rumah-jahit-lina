@@ -44,12 +44,48 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($orders as $order)
+                                        @php
+                                            $statusPengiriman = $order->status_pengiriman;
+                                        @endphp
                                         <tr class="td-order-item">
                                             <td class="body-text-3">#{{ $order->kode_invoice }}</td>
                                             <td class="body-text-3">{{ $order->created_at->format("d M Y") }} </td>
-                                            <td class="body-text-3"><span class="badge bg-primary">{{ $order->status_pengiriman ? 'Dikirim' : 'Belum Dikirim' }}</span></td>
+                                            <td class="body-text-3">
+                                                @if ($statusPengiriman === "pending")
+                                                    <span class="badge bg-secondary">
+                                                        Belum Dikirim
+                                                    </span>
+                                                @elseif ($statusPengiriman === "dikirim")
+                                                    <span class="badge bg-info">
+                                                        Dikirim
+                                                    </span>
+                                                @elseif ($statusPengiriman === "diterima")
+                                                    <span class="badge bg-success">
+                                                        Diterima
+                                                    </span>
+                                                @elseif ($statusPengiriman === "dibatalkan")
+                                                    <span class="badge bg-danger">
+                                                        Dibatalkan
+                                                    </span>
+                                                @endif
+                                            </td>
                                             <td class="body-text-3">Rp {{ number_format($order->total_bayar, 0, ",", ".") }}</td>
-                                            <td><a href="{{ route("order.confirmation", $order->id_invoice) }}" class="tf-btn btn-small d-inline-flex">
+                                            <td>
+                                                @if ($statusPengiriman === "dikirim")
+                                                    <form action="{{ route('transaksi.update-shipping', $order->id_invoice) }}" method="post" class="d-inline-flex">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="status_pengiriman" value="diterima">
+                                                        <button type="submit" class="btn btn-small btn-warning d-inline-flex">
+                                                            <span class="text-white">Terima</span>
+                                                        </button>
+                                                    </form>
+                                                @elseif ($statusPengiriman === "diterima")
+                                                     <a href="" class="btn btn-small btn-success d-inline-flex">
+                                                        <span class="text-white">Nilai</span>
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route("order.confirmation", $order->id_invoice) }}" class="btn btn-primary btn-small d-inline-flex">
                                                     <span class="text-white">Detail</span>
                                                 </a>
                                             </td>
