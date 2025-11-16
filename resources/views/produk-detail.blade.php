@@ -34,6 +34,19 @@
     <section>
         <div class="tf-main-product section-image-zoom">
             <div class="container">
+                @if (session("success"))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="icon-check"></i> {{ session("success") }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @if (session("error"))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="icon-close"></i> {{ session("error") }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
                 <div class="row">
                     <div class="col-md-6">
                         <!-- Product Image -->
@@ -249,6 +262,129 @@
         </div>
     </section>
     <!-- /Product Main -->
+
+    <!-- Reviews Section -->
+    <section class="tf-sp-2">
+        <div class="container">
+            <div class="flat-title-tab-product-des">
+                <div class="flat-title-tab">
+                    <ul class="menu-tab-line">
+                        <li class="nav-tab-item">
+                            <p class="product-title fw-semibold">
+                                Ulasan & Rating
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-main tab-review flex-lg-nowrap">
+                    @if ($totalReviews > 0)
+                        <div class="tab-rating-wrap">
+                            <div class="rating-percent">
+                                <p class="rate-percent">{{ number_format($averageRating, 1) }} <span>/ 5</span></p>
+                                <ul class="list-star justify-content-center">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <li>
+                                            <i class="icon-star {{ $i <= round($averageRating) ? '' : 'text-main-4' }}"></i>
+                                        </li>
+                                    @endfor
+                                </ul>
+                                <p class="text-cl-3">
+                                    Berdasarkan {{ number_format($totalReviews) }} ulasan
+                                </p>
+                            </div>
+                            <ul class="rating-progress-list">
+                                @for ($rating = 5; $rating >= 1; $rating--)
+                                    <li>
+                                        <p class="start-number body-text-3">{{ $rating }}<i class="icon-star text-third"></i></p>
+                                        <div class="rating-progress">
+                                            <div class="progress style-2" role="progressbar" 
+                                                aria-valuenow="{{ $ratingPercentages[$rating] }}" 
+                                                aria-valuemin="0" 
+                                                aria-valuemax="100">
+                                                <div class="progress-bar" style="width: {{ $ratingPercentages[$rating] }}%;"></div>
+                                            </div>
+                                        </div>
+                                        <p class="count-review body-text-3">{{ $ratingDistribution[$rating] }}</p>
+                                    </li>
+                                @endfor
+                            </ul>
+                        </div>
+                    @endif
+                    <div class="tab-review-wrap" style="flex: 1;">
+
+                        @if ($totalReviews > 0)
+                            <ul class="review-list">
+                                @foreach ($ulasanRatings as $ulasan)
+                                    <li class="box-review">
+                                        <div class="avt">
+                                            @if ($ulasan->user->foto)
+                                                <img src="{{ asset($ulasan->user->foto) }}" alt="{{ $ulasan->user->nama }}" style="width: 50px; height: 50px; object-fit: cover;">
+                                            @else
+                                                <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--gray-5); display: flex; align-items: center; justify-content: center; color: var(--gray-3); font-weight: bold; font-size: 18px;">
+                                                    {{ strtoupper(substr($ulasan->user->nama, 0, 1)) }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="review-content">
+                                            <div class="author-wrap">
+                                                <h6 class="name fw-semibold">
+                                                    <a href="#" class="link">{{ $ulasan->user->nama }}</a>
+                                                </h6>
+                                                <ul class="verified">
+                                                    <li class="body-small fw-semibold text-main-2">
+                                                        Verified Purchase
+                                                    </li>
+                                                </ul>
+                                                <ul class="list-star">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <li>
+                                                            <i class="icon-star {{ $i <= $ulasan->rating ? '' : 'text-main-4' }}"></i>
+                                                        </li>
+                                                    @endfor
+                                                </ul>
+                                            </div>
+                                            @if ($ulasan->ulasan)
+                                                <p class="text-review">
+                                                    {{ $ulasan->ulasan }}
+                                                </p>
+                                            @endif
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <p class="date-review body-small">
+                                                    {{ $ulasan->created_at->diffForHumans() }}
+                                                </p>
+                                                @auth
+                                                    @if (Auth::id() == $ulasan->user_id || Auth::user()->role == 'admin')
+                                                        <form action="{{ route('ulasan.destroy', $ulasan->id_ulasan_rating) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ulasan ini?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                <i class="icon-trash"></i> Hapus
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @endauth
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+
+                            <!-- Pagination -->
+                            <div class="mt-4">
+                                {{ $ulasanRatings->links() }}
+                            </div>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="icon-star" style="font-size: 3rem; color: #ddd;"></i>
+                                <p class="text-muted mt-3">Belum ada ulasan untuk produk ini.</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /Reviews Section -->
 
     @push("scripts")
         <script>

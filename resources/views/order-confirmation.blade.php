@@ -210,17 +210,27 @@
                                             <td class="text-end">Rp. {{ number_format($item->subtotal, 0, ",", ".") }}</td>
                                             @if ($invoice->status_pengiriman == "diterima")
                                                 <td class="text-center">
-                                                    <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-info text-white btn-sm">
-                                                        Nilai Produk
-                                                    </a>
-                                                </td>
-                                                @if ($item->nilai)
-                                                    <td class="text-center">
-                                                        <a href="{{ route('produk.detail', $item->produk->id_produk) }}" class="btn btn-primary text-white btn-sm">
-                                                            Lihat Produk
+                                                    @php
+                                                        $userReview = $userReviews[$item->produk_id] ?? null;
+                                                    @endphp
+                                                    @if ($userReview)
+                                                        <div class="d-flex flex-column gap-1">
+                                                            <span class="badge bg-success mb-1">Sudah Dinilai</span>
+                                                            <div class="mb-1">
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    <i class="icon-star {{ $i <= $userReview->rating ? 'text-warning' : 'text-muted' }}" style="font-size: 0.8rem;"></i>
+                                                                @endfor
+                                                            </div>
+                                                            <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-sm btn-outline-primary">
+                                                                Edit Ulasan
+                                                            </a>
+                                                        </div>
+                                                    @else
+                                                        <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-info text-white btn-sm">
+                                                            Nilai Produk
                                                         </a>
-                                                    </td>
-                                                @endif
+                                                    @endif
+                                                </td>
                                             @endif
                                         </tr>
                                     @endforeach

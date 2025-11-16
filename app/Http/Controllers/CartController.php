@@ -7,6 +7,7 @@ use App\Models\ItemTransaksi;
 use App\Models\JenisProduk;
 use App\Models\Produk;
 use App\Models\RiwayatStokProduk;
+use App\Models\UlasanRating;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -211,7 +212,18 @@ class CartController extends Controller
             ->with(['produk', 'jenisProduk'])
             ->get();
 
-        return view('order-confirmation', compact('invoice', 'items'));
+        // Cek apakah user sudah memberikan ulasan untuk setiap produk
+        $userReviews = [];
+        if (Auth::check()) {
+            foreach ($items as $item) {
+                $review = UlasanRating::where('user_id', Auth::id())
+                    ->where('produk_id', $item->produk_id)
+                    ->first();
+                $userReviews[$item->produk_id] = $review;
+            }
+        }
+
+        return view('order-confirmation', compact('invoice', 'items', 'userReviews'));
     }
 
     /**

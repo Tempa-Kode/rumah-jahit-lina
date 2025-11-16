@@ -69,4 +69,9 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordKustom($token));
     }
+
+    public function ulasanRating() : HasMany
+    {
+        return $this->hasMany(UlasanRating::class, 'user_id', 'id_user');
+    }
 }

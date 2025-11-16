@@ -59,4 +59,9 @@ class Produk extends Model
             })
             ->sum('jumlah');
     }
+
+    public function ulasanRating() : HasMany
+    {
+        return $this->hasMany(UlasanRating::class, 'produk_id', 'id_produk');
+    }
 }

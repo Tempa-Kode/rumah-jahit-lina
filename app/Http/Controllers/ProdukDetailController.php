@@ -41,6 +41,36 @@ class ProdukDetailController extends Controller
         // Ambil semua kategori untuk sidebar
         $kategori = Kategori::all();
 
-        return view('produk-detail', compact('produk', 'produkTerkait', 'produkSerupa', 'kategori'));
+        // Ambil ulasan rating dengan user
+        $ulasanRatings = $produk->ulasanRating()->with('user')->latest()->paginate(10);
+        
+        // Hitung rata-rata rating
+        $averageRating = $produk->ulasanRating()->avg('rating') ?? 0;
+        $totalReviews = $produk->ulasanRating()->count();
+        
+        // Hitung distribusi rating (5, 4, 3, 2, 1)
+        $ratingDistribution = [
+            5 => $produk->ulasanRating()->where('rating', 5)->count(),
+            4 => $produk->ulasanRating()->where('rating', 4)->count(),
+            3 => $produk->ulasanRating()->where('rating', 3)->count(),
+            2 => $produk->ulasanRating()->where('rating', 2)->count(),
+            1 => $produk->ulasanRating()->where('rating', 1)->count(),
+        ];
+        
+        // Hitung persentase untuk setiap rating
+        $ratingPercentages = [];
+        foreach ($ratingDistribution as $rating => $count) {
+            $ratingPercentages[$rating] = $totalReviews > 0 ? ($count / $totalReviews) * 100 : 0;
+        }
+        
+        // Cek apakah user sudah memberikan ulasan
+        $userReview = null;
+        if (auth()->check()) {
+            $userReview = $produk->ulasanRating()
+                ->where('user_id', auth()->id())
+                ->first();
+        }
+
+        return view('produk-detail', compact('produk', 'produkTerkait', 'produkSerupa', 'kategori', 'ulasanRatings', 'averageRating', 'totalReviews', 'userReview', 'ratingDistribution', 'ratingPercentages'));
     }
 }
