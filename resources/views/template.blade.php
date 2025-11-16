@@ -188,6 +188,9 @@
     <!-- Register -->
     @include("partials.register")
     <!-- /Register -->
+    <!-- Forgot Password -->
+    @include("partials.lupa-password")
+    <!-- /Forgot Password -->
     <!-- Shopping Cart -->
     {{-- @include("partials.shopping-cart") --}}
     <!-- /Shopping Cart -->

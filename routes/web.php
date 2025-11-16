@@ -8,6 +8,11 @@ Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->na
 Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register.store');
 Route::get('/dashboard-admin', [App\Http\Controllers\HomeController::class, 'dashboard'])->middleware('auth')->name('dashboard.admin');
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->middleware('auth')->name('logout');
+Route::post('lupa-password', [\App\Http\Controllers\LupaPasswordController::class, 'kirimLinkReset'])->name('lupa-password');
+Route::get('/reset-password/{token}', function (string $token) {
+    return view('auth.reset-password', ['token' => $token]);
+})->middleware('guest')->name('password.reset');
+Route::post('/reset-password', [\App\Http\Controllers\LupaPasswordController::class, 'resetPassword'])->middleware('guest')->name('password.update');
 
 // Cart & Checkout Routes
 Route::get('/cart', [App\Http\Controllers\CartController::class, 'index'])->name('cart');

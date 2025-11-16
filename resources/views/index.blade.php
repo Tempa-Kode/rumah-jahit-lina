@@ -68,6 +68,11 @@
                     </ul>
                 </div>
             @endif
+            @if(session('status'))
+                <div class="alert alert-success">
+                    {{ session('status') }}
+                </div>
+            @endif
             <div class="tf-shop-control flex-wrap gap-10">
                 <div class="d-flex align-items-center gap-10 w-100">
                     <button id="filterShop" class="tf-btn-filter d-flex d-xl-none">
