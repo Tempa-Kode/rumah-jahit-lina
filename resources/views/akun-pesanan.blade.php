@@ -81,7 +81,7 @@
                                                         </button>
                                                     </form>
                                                 @elseif ($statusPengiriman === "diterima")
-                                                     <a href="" class="btn btn-small btn-success d-inline-flex">
+                                                     <a href="{{ route('order.confirmation', $order->id_invoice) }}#detail" class="btn btn-small btn-success d-inline-flex">
                                                         <span class="text-white">Nilai</span>
                                                     </a>
                                                 @endif

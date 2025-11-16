@@ -16,6 +16,7 @@ class ItemTransaksi extends Model
         'jenis_produk_id',
         'jumlah',
         'subtotal',
+        'nilai'
     ];
 
     public function invoice() : BelongsTo

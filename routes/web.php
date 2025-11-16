@@ -94,3 +94,9 @@ Route::prefix('pembayaran')->group(function () {
     Route::post('/', [\App\Http\Controllers\PembayaranController::class, 'bayar'])->name('pembayaran.bayar');
     Route::put('/cek-status', [\App\Http\Controllers\PembayaranController::class, 'updateStatus'])->name('pembayaran.cek-status');
 });
+
+Route::prefix('/ulasan')->group(function () {
+    Route::get('/form/{produk_id}', [\App\Http\Controllers\UlasanRatingController::class, 'formTambahUlasan'])->name('ulasan.form');
+    Route::post('/{produk_id}', [\App\Http\Controllers\UlasanRatingController::class, 'store'])->name('ulasan.store');
+    Route::delete('/{id}', [\App\Http\Controllers\UlasanRatingController::class, 'destroy'])->name('ulasan.destroy');
+});

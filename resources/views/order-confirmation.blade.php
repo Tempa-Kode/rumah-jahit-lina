@@ -93,29 +93,31 @@
                     <div class="col-md-6">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h5 class="card-title mb-3">Informasi Pengiriman</h5>
-                                <table class="table table-borderless">
-                                    <tr>
-                                        <td width="120"><strong>Nama:</strong></td>
-                                        <td>{{ $invoice->nama }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>No. HP:</strong></td>
-                                        <td>{{ $invoice->no_hp }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Alamat:</strong></td>
-                                        <td>{{ $invoice->alamat }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Ongkir:</strong></td>
-                                        <td>Rp. {{ number_format(num: $invoice->ongkir, decimals: 0, decimal_separator: '.', thousands_separator: '.') }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Layanan Kurir:</strong></td>
-                                        <td>{{ $invoice->kurir }}</td>
-                                    </tr>
-                                </table>
+                                <div class="add-comment-wrap">
+                                    <h5 class="card-title mb-3">Informasi Pengiriman</h5>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td width="120"><strong>Nama:</strong></td>
+                                            <td>{{ $invoice->nama }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>No. HP:</strong></td>
+                                            <td>{{ $invoice->no_hp }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Alamat:</strong></td>
+                                            <td>{{ $invoice->alamat }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Ongkir:</strong></td>
+                                            <td>Rp. {{ number_format(num: $invoice->ongkir, decimals: 0, decimal_separator: '.', thousands_separator: '.') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Layanan Kurir:</strong></td>
+                                            <td>{{ $invoice->kurir }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -169,7 +171,7 @@
                 <!-- Order Items -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Detail Pesanan</h5>
+                        <h5 class="card-title mb-3" id="detail">Detail Pesanan</h5>
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
@@ -178,6 +180,9 @@
                                         <th class="text-center">Jumlah</th>
                                         <th class="text-end">Harga</th>
                                         <th class="text-end">Subtotal</th>
+                                        @if ($invoice->status_pengiriman == "diterima")
+                                            <th class="text-center">Aksi</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -203,6 +208,20 @@
                                             <td class="text-end">Rp. {{ number_format($item->produk->harga, 0, ",", ".") }}
                                             </td>
                                             <td class="text-end">Rp. {{ number_format($item->subtotal, 0, ",", ".") }}</td>
+                                            @if ($invoice->status_pengiriman == "diterima")
+                                                <td class="text-center">
+                                                    <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-info text-white btn-sm">
+                                                        Nilai Produk
+                                                    </a>
+                                                </td>
+                                                @if ($item->nilai)
+                                                    <td class="text-center">
+                                                        <a href="{{ route('produk.detail', $item->produk->id_produk) }}" class="btn btn-primary text-white btn-sm">
+                                                            Lihat Produk
+                                                        </a>
+                                                    </td>
+                                                @endif
+                                            @endif
                                         </tr>
                                     @endforeach
                                 </tbody>
