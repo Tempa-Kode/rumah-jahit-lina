@@ -177,7 +177,10 @@ class ShoppingCart {
                                 </a>
                                 ${
                                     item.jenis_nama
-                                        ? `<p class="new-price price-text fw-medium mb-1">${item.jenis_nama}</p>`
+                                        ? `<p class="new-price price-text fw-medium mb-1">${this.cleanVariantName(
+                                              item.jenis_nama,
+                                              item.nama
+                                          )}</p>`
                                         : ""
                                 }
                                 <p class="price-wrap fw-medium">
@@ -244,6 +247,39 @@ class ShoppingCart {
     // Format price to Indonesian format
     formatPrice(price) {
         return new Intl.NumberFormat("id-ID").format(price);
+    }
+
+    // Clean/sanitize variant name to avoid duplicates like "Biru Biru"
+    cleanVariantName(rawName, productName = "") {
+        if (!rawName) return "";
+
+        const name = String(rawName).trim();
+        const prod = String(productName || "").toLowerCase();
+
+        // Split by ' - ' to allow multi-part variants
+        let parts = name
+            .split(/\s*-\s*/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+
+        // Flatten all words from all parts, remove duplicates (case-insensitive, order preserved)
+        let allWords = [];
+        parts.forEach((part) => {
+            part.split(/\s+/).forEach((word) => {
+                const w = word.trim();
+                if (
+                    w &&
+                    !allWords.some((x) => x.toLowerCase() === w.toLowerCase())
+                ) {
+                    allWords.push(w);
+                }
+            });
+        });
+
+        // Remove words that are already present in product name
+        allWords = allWords.filter((w) => prod.indexOf(w.toLowerCase()) === -1);
+
+        return allWords.join(" ");
     }
 
     // Attach event listeners to cart items
@@ -393,6 +429,14 @@ class ShoppingCart {
             productData.stock = isNaN(stock) ? 0 : stock;
         } catch (e) {
             productData.stock = 0;
+        }
+
+        // sanitize jenis_nama before saving to localStorage
+        if (productData.jenis_nama) {
+            productData.jenis_nama = this.cleanVariantName(
+                productData.jenis_nama,
+                productData.nama
+            );
         }
 
         this.addToCart(productData);

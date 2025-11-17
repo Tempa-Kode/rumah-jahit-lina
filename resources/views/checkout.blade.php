@@ -129,6 +129,32 @@
                 return new Intl.NumberFormat('id-ID').format(price);
             }
 
+            // Safely format variant text to avoid duplicated parts (e.g. "Biru - 4 Inch - Biru - 4 Inch")
+            function formatVariant(item) {
+                const nama = (item.nama || '').toLowerCase();
+                const jenisRaw = item.jenis_nama || '';
+                if (!jenisRaw) return '';
+
+                // split by ' - ' or commas if present
+                const parts = jenisRaw.split(/\s*-\s*/).map(p => p.trim()).filter(Boolean);
+                const unique = [];
+
+                parts.forEach(p => {
+                    const low = p.toLowerCase();
+
+                    // skip if already added
+                    if (unique.find(up => up.toLowerCase() === low)) return;
+
+                    // skip if this part is already included in item nama (to avoid repeats)
+                    if (nama.indexOf(low) !== -1) return;
+
+                    unique.push(p);
+                });
+
+                if (unique.length === 0) return '';
+                return `<p class="body-md-2 text-main-2">${unique.join(' - ')}</p>`;
+            }
+
             // Render checkout summary
             function renderCheckoutSummary() {
                 // Get cart from localStorage directly
@@ -144,7 +170,7 @@
                     return;
                 }
 
-                // Render items using template structure
+                // Render items using template structure (use formatVariant to avoid duplicated variant text)
                 checkoutSummary.innerHTML = cart.map(item => {
                     const itemTotal = parseInt(item.harga) * parseInt(item.quantity);
                     return `
@@ -160,7 +186,7 @@
                             Rp. ${formatPrice(itemTotal)}
                             <span class="body-md-2 text-main-2 fw-normal">X${item.quantity}</span>
                         </p>
-                        ${item.jenis_nama ? `<p class="body-md-2 text-main-2">${item.jenis_nama}</p>` : ''}
+                        ${formatVariant(item)}
                     </div>
                 </li>
             `;

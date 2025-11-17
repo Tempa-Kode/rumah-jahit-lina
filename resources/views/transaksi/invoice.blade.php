@@ -95,7 +95,7 @@
                                             @endphp
 
                                             <td>:
-                                               @if ($statusPengiriman === "dikirim")
+                                                @if ($statusPengiriman === "dikirim")
                                                     <span class="badge badge-success px-20 py-9 radius-4">
                                                         Sudah Dikirim
                                                     </span>
@@ -138,16 +138,40 @@
                                                     {{ $item->jenisProduk->produk->nama }}
                                                     <br>
                                                     @if ($item->jenis_produk_id && $item->jenisProduk)
-                                                    <small class="text-muted">
-                                                        {{ $item->jenisProduk->nama }}
-                                                        @if ($item->jenisProduk->warna)
-                                                            - {{ $item->jenisProduk->warna }}
+                                                        @php
+                                                            $namaVar = trim($item->jenisProduk->nama ?? "");
+                                                            $warnaVar = trim($item->jenisProduk->warna ?? "");
+                                                            $ukuranVar = trim($item->jenisProduk->ukuran ?? "");
+
+                                                            $parts = [];
+
+                                                            if ($namaVar !== "") {
+                                                                $containsWarna =
+                                                                    $warnaVar !== "" &&
+                                                                    stripos($namaVar, $warnaVar) !== false;
+                                                                $containsUkuran =
+                                                                    $ukuranVar !== "" &&
+                                                                    stripos($namaVar, $ukuranVar) !== false;
+                                                                if (!$containsWarna && !$containsUkuran) {
+                                                                    $parts[] = $namaVar;
+                                                                }
+                                                            }
+
+                                                            if ($warnaVar !== "") {
+                                                                $parts[] = $warnaVar;
+                                                            }
+
+                                                            if ($ukuranVar !== "") {
+                                                                $parts[] = $ukuranVar;
+                                                            }
+                                                        @endphp
+
+                                                        @if (count($parts) > 0)
+                                                            <small class="text-muted">
+                                                                {{ implode(" - ", $parts) }}
+                                                            </small>
                                                         @endif
-                                                        @if ($item->jenisProduk->ukuran)
-                                                            - {{ $item->jenisProduk->ukuran }}
-                                                        @endif
-                                                    </small>
-                                                @endif
+                                                    @endif
                                                 </td>
                                                 <td>{{ $item->jumlah }}</td>
                                                 <td>Rp {{ number_format($item->jenisProduk->harga, 0, ",", ".") }}</td>

@@ -196,22 +196,50 @@
                                                         @if ($item->jenisProduk)
                                                             <br>
                                                             <small class="text-muted fst-italic">
-                                                                {{ $item->jenisProduk->nama }}
-                                                                @if ($item->jenisProduk->warna)
-                                                                    - {{ $item->jenisProduk->warna }}
+                                                                @php
+                                                                    $namaVar = trim($item->jenisProduk->nama ?? "");
+                                                                    $warnaVar = trim($item->jenisProduk->warna ?? "");
+                                                                    $ukuranVar = trim($item->jenisProduk->ukuran ?? "");
+
+                                                                    $parts = [];
+
+                                                                    if ($namaVar !== "") {
+                                                                        $containsWarna =
+                                                                            $warnaVar !== "" &&
+                                                                            stripos($namaVar, $warnaVar) !== false;
+                                                                        $containsUkuran =
+                                                                            $ukuranVar !== "" &&
+                                                                            stripos($namaVar, $ukuranVar) !== false;
+                                                                        if (!$containsWarna && !$containsUkuran) {
+                                                                            $parts[] = $namaVar;
+                                                                        }
+                                                                    }
+
+                                                                    if ($warnaVar !== "") {
+                                                                        $parts[] = $warnaVar;
+                                                                    }
+
+                                                                    if ($ukuranVar !== "") {
+                                                                        $parts[] = $ukuranVar;
+                                                                    }
+                                                                @endphp
+
+                                                                @if (count($parts) > 0)
+                                                                    <br>
+                                                                    <small class="text-muted fst-italic">
+                                                                        {{ implode(" - ", $parts) }}
+                                                                    </small>
                                                                 @endif
-                                                                @if ($item->jenisProduk->ukuran)
-                                                                    - {{ $item->jenisProduk->ukuran }}
-                                                                @endif
-                                                            </small>
                                                         @endif
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="text-center">{{ $item->jumlah }}</td>
-                                            <td class="text-end">Rp. {{ number_format($item->produk->harga, 0, ",", ".") }}
+                                            <td class="text-end">Rp.
+                                                {{ number_format($item->produk->harga, 0, ",", ".") }}
                                             </td>
-                                            <td class="text-end">Rp. {{ number_format($item->subtotal, 0, ",", ".") }}</td>
+                                            <td class="text-end">Rp. {{ number_format($item->subtotal, 0, ",", ".") }}
+                                            </td>
                                             @if ($invoice->status_pengiriman == "diterima")
                                                 <td class="text-center">
                                                     @php
@@ -222,15 +250,18 @@
                                                             <span class="badge bg-success mb-1">Sudah Dinilai</span>
                                                             <div class="mb-1">
                                                                 @for ($i = 1; $i <= 5; $i++)
-                                                                    <i class="icon-star {{ $i <= $userReview->rating ? 'text-warning' : 'text-muted' }}" style="font-size: 0.8rem;"></i>
+                                                                    <i class="icon-star {{ $i <= $userReview->rating ? "text-warning" : "text-muted" }}"
+                                                                        style="font-size: 0.8rem;"></i>
                                                                 @endfor
                                                             </div>
-                                                            <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-sm btn-outline-primary">
+                                                            <a href="{{ route("ulasan.form", $item->produk->id_produk) }}"
+                                                                class="btn btn-sm btn-outline-primary">
                                                                 Edit Ulasan
                                                             </a>
                                                         </div>
                                                     @else
-                                                        <a href="{{ route('ulasan.form', $item->produk->id_produk) }}" class="btn btn-info text-white btn-sm">
+                                                        <a href="{{ route("ulasan.form", $item->produk->id_produk) }}"
+                                                            class="btn btn-info text-white btn-sm">
                                                             Nilai Produk
                                                         </a>
                                                     @endif
@@ -261,44 +292,44 @@
                 </div>
 
                 <!-- Payment Instructions -->
-{{--                @if ($invoice->status_pembayaran == "pending")--}}
-{{--                    <div class="card mb-4">--}}
-{{--                        <div class="card-body">--}}
-{{--                            <h5 class="card-title mb-3">Pembayaran</h5>--}}
+                {{--                @if ($invoice->status_pembayaran == "pending") --}}
+                {{--                    <div class="card mb-4"> --}}
+                {{--                        <div class="card-body"> --}}
+                {{--                            <h5 class="card-title mb-3">Pembayaran</h5> --}}
 
-{{--                            <!-- Upload Payment Proof -->--}}
-{{--                            @if (!$invoice->bukti_pembayaran)--}}
-{{--                                <h6 class="mt-4 mb-3">Upload Bukti Pembayaran</h6>--}}
-{{--                                <form action="{{ route("order.payment.proof", $invoice->id) }}" method="POST"--}}
-{{--                                    enctype="multipart/form-data">--}}
-{{--                                    @csrf--}}
-{{--                                    <div class="mb-3">--}}
-{{--                                        <input type="file" name="bukti_pembayaran" class="form-control"--}}
-{{--                                            accept="image/*" required>--}}
-{{--                                        <small class="text-muted">Format: JPG, PNG. Maks 2MB</small>--}}
-{{--                                    </div>--}}
-{{--                                    <button type="submit" class="tf-btn">--}}
-{{--                                        <span class="text-white">Upload Bukti Transfer</span>--}}
-{{--                                    </button>--}}
-{{--                                </form>--}}
-{{--                            @else--}}
-{{--                                <div class="alert alert-success mt-3">--}}
-{{--                                    <div class="d-flex align-items-center mb-2">--}}
-{{--                                        <i class="icon-check me-2"></i>--}}
-{{--                                        <strong>Bukti pembayaran sudah diunggah. Menunggu verifikasi admin.</strong>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="mt-3">--}}
-{{--                                        <p class="mb-2"><strong>Preview Bukti Transfer:</strong></p>--}}
-{{--                                        <img src="{{ asset($invoice->bukti_pembayaran) }}" alt="Bukti Pembayaran"--}}
-{{--                                            class="img-thumbnail" style="max-width: 300px; cursor: pointer;"--}}
-{{--                                            onclick="window.open('{{ asset($invoice->bukti_pembayaran) }}', '_blank')">--}}
-{{--                                        <p class="small text-muted mt-2">Klik gambar untuk melihat ukuran penuh</p>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            @endif--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                @endif--}}
+                {{--                            <!-- Upload Payment Proof --> --}}
+                {{--                            @if (!$invoice->bukti_pembayaran) --}}
+                {{--                                <h6 class="mt-4 mb-3">Upload Bukti Pembayaran</h6> --}}
+                {{--                                <form action="{{ route("order.payment.proof", $invoice->id) }}" method="POST" --}}
+                {{--                                    enctype="multipart/form-data"> --}}
+                {{--                                    @csrf --}}
+                {{--                                    <div class="mb-3"> --}}
+                {{--                                        <input type="file" name="bukti_pembayaran" class="form-control" --}}
+                {{--                                            accept="image/*" required> --}}
+                {{--                                        <small class="text-muted">Format: JPG, PNG. Maks 2MB</small> --}}
+                {{--                                    </div> --}}
+                {{--                                    <button type="submit" class="tf-btn"> --}}
+                {{--                                        <span class="text-white">Upload Bukti Transfer</span> --}}
+                {{--                                    </button> --}}
+                {{--                                </form> --}}
+                {{--                            @else --}}
+                {{--                                <div class="alert alert-success mt-3"> --}}
+                {{--                                    <div class="d-flex align-items-center mb-2"> --}}
+                {{--                                        <i class="icon-check me-2"></i> --}}
+                {{--                                        <strong>Bukti pembayaran sudah diunggah. Menunggu verifikasi admin.</strong> --}}
+                {{--                                    </div> --}}
+                {{--                                    <div class="mt-3"> --}}
+                {{--                                        <p class="mb-2"><strong>Preview Bukti Transfer:</strong></p> --}}
+                {{--                                        <img src="{{ asset($invoice->bukti_pembayaran) }}" alt="Bukti Pembayaran" --}}
+                {{--                                            class="img-thumbnail" style="max-width: 300px; cursor: pointer;" --}}
+                {{--                                            onclick="window.open('{{ asset($invoice->bukti_pembayaran) }}', '_blank')"> --}}
+                {{--                                        <p class="small text-muted mt-2">Klik gambar untuk melihat ukuran penuh</p> --}}
+                {{--                                    </div> --}}
+                {{--                                </div> --}}
+                {{--                            @endif --}}
+                {{--                        </div> --}}
+                {{--                    </div> --}}
+                {{--                @endif --}}
 
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-center gap-2">
@@ -306,12 +337,8 @@
                         <span class="text-white">Kembali ke Beranda</span>
                     </a>
                     @if ($invoice->status_pembayaran == "pending")
-                        <button
-                            class="btn btn-success"
-                            id="bayar"
-                            data-id-invoice="{{ $invoice->id_invoice }}"
-                            data-total-bayar="{{ $invoice->total_bayar }}"
-                        >
+                        <button class="btn btn-success" id="bayar" data-id-invoice="{{ $invoice->id_invoice }}"
+                            data-total-bayar="{{ $invoice->total_bayar }}">
                             Lakukan Pembayaran
                         </button>
                     @endif
@@ -327,19 +354,18 @@
     <!-- /Order Confirmation -->
 @endsection
 
-@push('scripts')
-    <script type="text/javascript"
-            src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('services.midtrans.clientKey') }}"></script>
+@push("scripts")
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config("services.midtrans.clientKey") }}"></script>
 
     <script type="text/javascript">
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Set environment untuk sandbox
             if (typeof snap !== 'undefined') {
                 snap.environment = 'sandbox';
             }
 
-            $('#bayar').on('click', function () {
+            $('#bayar').on('click', function() {
                 const payButton = $(this);
                 const id_invoice = payButton.data('id-invoice');
                 const total_bayar = payButton.data('total-bayar');
@@ -361,7 +387,8 @@
                                 title: 'Oops...',
                                 text: 'Gagal mendapatkan token pembayaran. Silakan coba lagi.',
                             });
-                            payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            payButton.prop('disabled', false).html(
+                                '<i class="fa-solid fa-money-bill"></i> Bayar');
                             return;
                         }
 
@@ -372,12 +399,13 @@
                                 title: 'Error',
                                 text: 'Midtrans Snap belum termuat. Silakan refresh halaman.',
                             });
-                            payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                            payButton.prop('disabled', false).html(
+                                '<i class="fa-solid fa-money-bill"></i> Bayar');
                             return;
                         }
 
                         snap.pay(response.snap_token, {
-                            onSuccess: function(result){
+                            onSuccess: function(result) {
                                 console.log('Success:', result);
                                 Swal.fire({
                                     icon: 'success',
@@ -389,7 +417,7 @@
                                     updateStatus(result.order_id);
                                 });
                             },
-                            onPending: function(result){
+                            onPending: function(result) {
                                 console.log('Pending:', result);
                                 Swal.fire({
                                     icon: 'info',
@@ -399,23 +427,27 @@
                                     location.reload();
                                 });
                             },
-                            onError: function(result){
+                            onError: function(result) {
                                 console.log('Error:', result);
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Pembayaran Gagal',
                                     text: 'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
                                 });
-                                payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                                payButton.prop('disabled', false).html(
+                                    '<i class="fa-solid fa-money-bill"></i> Bayar'
+                                    );
                             },
-                            onClose: function(){
+                            onClose: function() {
                                 console.log('Popup ditutup oleh pengguna.');
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Dibatalkan',
                                     text: 'Anda menutup jendela pembayaran sebelum selesai.'
                                 });
-                                payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                                payButton.prop('disabled', false).html(
+                                    '<i class="fa-solid fa-money-bill"></i> Bayar'
+                                    );
                             }
                         });
                     },
@@ -426,11 +458,12 @@
                             title: 'Koneksi Gagal',
                             text: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.'
                         });
-                        payButton.prop('disabled', false).html('<i class="fa-solid fa-money-bill"></i> Bayar');
+                        payButton.prop('disabled', false).html(
+                            '<i class="fa-solid fa-money-bill"></i> Bayar');
                     }
                 });
 
-                function updateStatus($order_id){
+                function updateStatus($order_id) {
                     console.log($order_id)
                     $.ajax({
                         url: '{{ route("pembayaran.cek-status") }}',
@@ -438,7 +471,7 @@
                         data: {
                             _token: '{{ csrf_token() }}',
                             _method: 'PUT',
-                            kode_invoice : $order_id
+                            kode_invoice: $order_id
                         },
                         success: function(response) {
                             window.location.href = '{{ route("akun.pesanan") }}';

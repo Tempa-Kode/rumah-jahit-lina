@@ -83,16 +83,42 @@
                                             <div class="d-flex flex-column gap-1">
                                                 <span class="fw-semibold">{{ $item->produk->nama }}</span>
                                                 @if ($item->jenis_produk_id && $item->jenisProduk)
-                                                    <span class="text-secondary-light text-sm">
-                                                        <i class="text-primary">Jenis:</i> 
-                                                        {{ $item->jenisProduk->nama }}
-                                                        @if ($item->jenisProduk->warna)
-                                                            - {{ $item->jenisProduk->warna }}
-                                                        @endif
-                                                        @if ($item->jenisProduk->ukuran)
-                                                            - {{ $item->jenisProduk->ukuran }}
-                                                        @endif
-                                                    </span>
+                                                    @php
+                                                        $namaVar = trim($item->jenisProduk->nama ?? "");
+                                                        $warnaVar = trim($item->jenisProduk->warna ?? "");
+                                                        $ukuranVar = trim($item->jenisProduk->ukuran ?? "");
+
+                                                        $parts = [];
+
+                                                        // Hanya tambahkan `nama` jika tidak kosong dan
+                                                        // tidak sudah mengandung warna/ukuran untuk menghindari duplikasi
+                                                        if ($namaVar !== "") {
+                                                            $containsWarna =
+                                                                $warnaVar !== "" &&
+                                                                stripos($namaVar, $warnaVar) !== false;
+                                                            $containsUkuran =
+                                                                $ukuranVar !== "" &&
+                                                                stripos($namaVar, $ukuranVar) !== false;
+                                                            if (!$containsWarna && !$containsUkuran) {
+                                                                $parts[] = $namaVar;
+                                                            }
+                                                        }
+
+                                                        if ($warnaVar !== "") {
+                                                            $parts[] = $warnaVar;
+                                                        }
+
+                                                        if ($ukuranVar !== "") {
+                                                            $parts[] = $ukuranVar;
+                                                        }
+                                                    @endphp
+
+                                                    @if (count($parts) > 0)
+                                                        <span class="text-secondary-light text-sm">
+                                                            <i class="text-primary">Jenis:</i>
+                                                            {{ implode(" - ", $parts) }}
+                                                        </span>
+                                                    @endif
                                                 @endif
                                             </div>
                                         </td>
@@ -198,13 +224,17 @@
                             </label>
                             <select class="form-select radius-8" name="status_pengiriman" required>
                                 <option value="">Pilih Status</option>
-                                <option value="pending" {{ $transaksi->status_pengiriman === "pending" ? "selected" : "" }}>
+                                <option value="pending"
+                                    {{ $transaksi->status_pengiriman === "pending" ? "selected" : "" }}>
                                     Belum Dikirim</option>
-                                <option value="dikirim" {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
+                                <option value="dikirim"
+                                    {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
                                     Sudah Dikirim</option>
-                                <option value="diterima" {{ $transaksi->status_pengiriman === "diterima" ? "selected" : "" }}>
+                                <option value="diterima"
+                                    {{ $transaksi->status_pengiriman === "diterima" ? "selected" : "" }}>
                                     Diterima</option>
-                                <option value="dibatalkan" {{ $transaksi->status_pengiriman === "dibatalkan" ? "selected" : "" }}>
+                                <option value="dibatalkan"
+                                    {{ $transaksi->status_pengiriman === "dibatalkan" ? "selected" : "" }}>
                                     Dibatalkan</option>
                             </select>
                         </div>
