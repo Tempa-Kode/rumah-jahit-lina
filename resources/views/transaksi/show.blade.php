@@ -84,7 +84,14 @@
                                                 <span class="fw-semibold">{{ $item->produk->nama }}</span>
                                                 @if ($item->jenis_produk_id && $item->jenisProduk)
                                                     <span class="text-secondary-light text-sm">
-                                                        <i class="text-primary">Jenis:</i> {{ $item->jenisProduk->nama }}
+                                                        <i class="text-primary">Jenis:</i> 
+                                                        {{ $item->jenisProduk->nama }}
+                                                        @if ($item->jenisProduk->warna)
+                                                            - {{ $item->jenisProduk->warna }}
+                                                        @endif
+                                                        @if ($item->jenisProduk->ukuran)
+                                                            - {{ $item->jenisProduk->ukuran }}
+                                                        @endif
                                                     </span>
                                                 @endif
                                             </div>

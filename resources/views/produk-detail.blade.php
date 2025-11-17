@@ -136,12 +136,11 @@
                                         @php
                                             $initialStock = $produk->jumlah_produk ?? 0;
                                             if ($produk->jenisProduk->count() > 0) {
-                                                $selected = $produk->jenisProduk->firstWhere(
-                                                    "id_jenis_produk",
-                                                    $produk->jenisProdukTerpilih,
-                                                );
-                                                if ($selected) {
-                                                    $initialStock = $selected->jumlah_produk ?? $initialStock;
+                                                $firstAvailable = $produk->jenisProduk->where('jumlah_produk', '>', 0)->first();
+                                                if ($firstAvailable) {
+                                                    $initialStock = $firstAvailable->jumlah_produk;
+                                                } else {
+                                                    $initialStock = $produk->jenisProduk->first()->jumlah_produk ?? 0;
                                                 }
                                             }
                                         @endphp
@@ -150,6 +149,7 @@
                                     </div>
                                     <div class="infor-center">
                                         <div class="product-info-price">
+                                            {{-- Harga akan diupdate oleh JS --}}
                                             <h4 class="text-primary">Rp. {{ number_format($produk->harga, 0, ",", ".") }}
                                             </h4>
                                         </div>
@@ -171,45 +171,35 @@
                                                     </button>
                                                 </div>
                                             </div>
+
+                                            {{-- Opsi Variasi Dinamis --}}
                                             @if ($produk->jenisProduk->count() > 0)
-                                                <div class="product-color">
-                                                    <p class=" title body-text-3">
-                                                        Jenis/Variasi
-                                                    </p>
-                                                    <div class="tf-select-color">
-                                                        @foreach ($produk->jenisProduk as $jenis)
-                                                            <input type="checkbox" class="btn-check jenis-checkbox"
-                                                                id="jenis-{{ $jenis->id_jenis_produk }}"
-                                                                value="{{ $jenis->id_jenis_produk }}"
-                                                                data-jenis-nama="{{ $jenis->nama }}"
-                                                                data-jenis-harga="{{ $jenis->harga }}"
-                                                                data-jenis-warna="{{ $jenis->warna }}"
-                                                                data-jenis-ukuran="{{ $jenis->ukuran }}"
-                                                                data-jenis-jumlah="{{ $jenis->jumlah_produk }}"
-                                                                {{ $jenis->id_jenis_produk == $produk->jenisProdukTerpilih ? "checked" : "" }}
-                                                                autocomplete="off">
-                                                            <label class="btn btn-outline-primary"
-                                                                for="jenis-{{ $jenis->id_jenis_produk }}">
-                                                                {{ $jenis->nama }}
-                                                                @if ($jenis->warna || $jenis->ukuran)
-                                                                    <br><small class="text-muted">
-                                                                        @if ($jenis->warna)
-                                                                            {{ $jenis->warna }}
-                                                                        @endif
-                                                                        @if ($jenis->warna && $jenis->ukuran)
-                                                                            -
-                                                                        @endif
-                                                                        @if ($jenis->ukuran)
-                                                                            {{ $jenis->ukuran }}
-                                                                        @endif
-                                                                    </small>
-                                                                @endif
-                                                                {{-- <br><small class="text-success fw-bold">Rp {{ number_format($jenis->harga, 0, ',', '.') }}</small> --}}
-                                                            </label>
-                                                        @endforeach
-                                                    </div>
+                                                <div id="variant-options">
+                                                    @foreach ($jenisProdukGrouped as $attribute => $values)
+                                                        @if (count($values) > 0)
+                                                            <div class="product-color mt-3">
+                                                                <p class="title body-text-3 text-capitalize">{{ $attribute }}</p>
+                                                                <div class="tf-select-color">
+                                                                    @foreach ($values as $value)
+                                                                        <input type="radio" class="btn-check variant-radio"
+                                                                            name="variant_{{ $attribute }}"
+                                                                            id="variant_{{ $attribute }}_{{ Str::slug($value) }}"
+                                                                            value="{{ $value }}"
+                                                                            data-attribute="{{ $attribute }}"
+                                                                            autocomplete="off">
+                                                                        <label class="btn btn-outline-primary"
+                                                                            for="variant_{{ $attribute }}_{{ Str::slug($value) }}">{{ $value }}</label>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                                <div id="variant-alert" class="alert alert-warning mt-2" style="display: none;">
+                                                    Kombinasi variasi tidak tersedia.
                                                 </div>
                                             @endif
+
                                             @auth
                                                 <div class="product-box-btn">
                                                     <a href="#shoppingCart" data-bs-toggle="offcanvas"
@@ -388,392 +378,276 @@
 
     @push("scripts")
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const jenisCheckboxes = document.querySelectorAll('.jenis-checkbox');
-                const btnAddToCart = document.querySelector('.btn-add-to-cart');
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasVariants = {{ $produk->jenisProduk->count() > 0 ? 'true' : 'false' }};
+            if (!hasVariants) return;
 
-                // Fungsi untuk mendapatkan checkbox yang terpilih
-                function getSelectedJenis() {
-                    const checked = document.querySelector('.jenis-checkbox:checked');
-                    return checked ? {
-                        id: checked.value,
-                        nama: checked.getAttribute('data-jenis-nama')
-                    } : null;
+            const allVariants = JSON.parse('{!! $semuaVariasiJson !!}');
+            const variantOptionsContainer = document.getElementById('variant-options');
+            const variantRadios = document.querySelectorAll('.variant-radio');
+            const variantAlert = document.getElementById('variant-alert');
+            
+            const priceElement = document.querySelector('.product-info-price h4');
+            const stockElement = document.getElementById('stock-count');
+            const productNameElement = document.getElementById('selected-jenis-name');
+            
+            const btnAddToCart = document.querySelector('.btn-add-to-cart');
+            const btnBuyNow = document.querySelector('.btn-buy-now');
+            const qtyInput = document.querySelector('.quantity-product');
+            const btnInc = document.querySelector('.btn-increase');
+            const btnDec = document.querySelector('.btn-decrease');
+
+            const defaultPrice = '{{ number_format($produk->harga, 0, ",", ".") }}';
+            const defaultStock = '{{ $produk->jumlah_produk ?? 0 }}';
+
+            function formatPrice(price) {
+                return new Intl.NumberFormat('id-ID').format(price);
+            }
+
+            function getSelectedOptions() {
+                const selected = {};
+                const checkedRadios = document.querySelectorAll('.variant-radio:checked');
+                checkedRadios.forEach(radio => {
+                    selected[radio.dataset.attribute] = radio.value;
+                });
+                return selected;
+            }
+
+            function findMatchingVariant(selectedOptions) {
+                return allVariants.find(variant => {
+                    let isMatch = true;
+                    for (const attribute in selectedOptions) {
+                        if (variant[attribute] !== selectedOptions[attribute]) {
+                            isMatch = false;
+                            break;
+                        }
+                    }
+                    return isMatch;
+                });
+            }
+
+            function updateSliderByVariant(variant) {
+                if (!variant) return;
+
+                const swiperMain = document.querySelector('#gallery-swiper-started');
+                if (swiperMain && swiperMain.swiper) {
+                    const slides = swiperMain.querySelectorAll('.swiper-slide');
+                    let targetIndex = -1;
+
+                    slides.forEach((slide, index) => {
+                        if (slide.getAttribute('data-jenis-id') == variant.id) {
+                            targetIndex = index;
+                        }
+                    });
+
+                    if (targetIndex !== -1) {
+                        swiperMain.swiper.slideTo(targetIndex);
+                    }
                 }
+            }
 
-                // Fungsi untuk update gambar slider berdasarkan jenis yang dipilih
-                function updateSliderByJenis(jenisId) {
-                    const swiperMain = document.querySelector('#gallery-swiper-started');
-                    if (swiperMain && swiperMain.swiper) {
-                        const slides = swiperMain.querySelectorAll('.swiper-slide');
-                        let targetIndex = -1;
+            function updateUI(variant) {
+                if (variant) {
+                    // Variasi ditemukan
+                    variantAlert.style.display = 'none';
+                    priceElement.textContent = 'Rp. ' + formatPrice(variant.harga);
+                    stockElement.textContent = variant.stok;
+                    
+                    let variantName = ` - ${variant.nama || ''} ${variant.warna || ''} ${variant.ukuran || ''}`;
+                    productNameElement.textContent = variantName.replace(/\s+/g, ' ').trim();
 
-                        slides.forEach((slide, index) => {
-                            if (slide.getAttribute('data-jenis-id') === jenisId) {
-                                targetIndex = index;
+                    updateSliderByVariant(variant);
+                    updateQuantityControls(variant.stok);
+                    updateActionButtons(variant);
+
+                } else {
+                    // Kombinasi tidak valid
+                    variantAlert.style.display = 'block';
+                    priceElement.textContent = 'Rp. ' + defaultPrice;
+                    stockElement.textContent = '0';
+                    productNameElement.textContent = '';
+                    updateQuantityControls(0);
+                    updateActionButtons(null); // Disable buttons
+                }
+            }
+            
+            function updateActionButtons(variant) {
+                const buttons = [btnAddToCart, btnBuyNow];
+                if (variant && variant.stok > 0) {
+                    buttons.forEach(btn => {
+                        if (!btn) return;
+                        btn.style.pointerEvents = '';
+                        btn.style.opacity = '';
+                        btn.removeAttribute('aria-disabled');
+                        if (btn.dataset._originalText) {
+                            btn.textContent = btn.dataset._originalText;
+                            delete btn.dataset._originalText;
+                        }
+                        // Update data attributes for cart/buy now
+                        btn.setAttribute('data-product-harga', variant.harga);
+                        btn.setAttribute('data-product-stok', variant.stok);
+                        // GAMBAR TIDAK DIUPDATE, JADI GAMBAR UTAMA YANG DIPAKAI
+                        // btn.setAttribute('data-product-gambar', variant.gambar);
+                        btn.setAttribute('data-product-jenis-id', variant.id);
+                        btn.setAttribute('data-product-jenis-nama', `${variant.nama || ''} ${variant.warna || ''} ${variant.ukuran || ''}`.trim());
+                    });
+                } else {
+                    buttons.forEach(btn => {
+                        if (!btn) return;
+                        btn.style.pointerEvents = 'none';
+                        btn.style.opacity = '0.6';
+                        btn.setAttribute('aria-disabled', 'true');
+                        if (!btn.dataset._originalText) {
+                            btn.dataset._originalText = btn.textContent.trim();
+                        }
+                        btn.textContent = (variant && variant.stok <= 0) ? 'Habis' : 'Pilih Variasi';
+                    });
+                }
+            }
+
+            function updateQuantityControls(stock) {
+                if (!qtyInput) return;
+                let val = parseInt(qtyInput.value, 10);
+                if (isNaN(val) || val < 1) val = 1;
+
+                if (stock <= 0) {
+                    qtyInput.value = 0;
+                    if (btnDec) btnDec.disabled = true;
+                    if (btnInc) btnInc.disabled = true; // Disable both if no stock
+                } else {
+                    if (val > stock) val = stock;
+                    qtyInput.value = val;
+                    if (btnDec) btnDec.disabled = (val <= 1);
+                    if (btnInc) btnInc.disabled = (val >= stock);
+                }
+            }
+
+            function handleSelectionChange() {
+                const selectedOptions = getSelectedOptions();
+                const requiredAttributes = Array.from(variantOptionsContainer.querySelectorAll('.product-color')).map(el => el.querySelector('.title').textContent.toLowerCase());
+                
+                // Hanya cari jika semua atribut sudah dipilih
+                if (Object.keys(selectedOptions).length === requiredAttributes.length) {
+                    const matchingVariant = findMatchingVariant(selectedOptions);
+                    updateUI(matchingVariant);
+                } else {
+                    // Jika belum semua dipilih, reset ke state "Pilih Variasi"
+                    updateUI(null);
+                }
+            }
+
+            function initialize() {
+                // Coba pilih variasi pertama yang tersedia
+                const firstAvailableVariant = allVariants.find(v => v.stok > 0);
+                if (firstAvailableVariant) {
+                    for (const attr in firstAvailableVariant) {
+                        if (['nama', 'warna', 'ukuran'].includes(attr) && firstAvailableVariant[attr]) {
+                            const radio = document.getElementById(`variant_${attr}_${CSS.escape(firstAvailableVariant[attr].replace(/\s+/g, '-').toLowerCase())}`);
+                            if (radio) {
+                                radio.checked = true;
                             }
-                        });
-
-                        if (targetIndex !== -1) {
-                            swiperMain.swiper.slideTo(targetIndex);
                         }
                     }
+                    handleSelectionChange(); // Update UI based on pre-selection
+                } else {
+                    // Tidak ada variasi yang tersedia sama sekali
+                    updateUI(null);
                 }
+            }
 
-                // Fungsi untuk update harga berdasarkan jenis yang dipilih
-                function updatePrice() {
-                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
-                    const priceElement = document.querySelector('.product-info-price h4');
+            variantRadios.forEach(radio => {
+                radio.addEventListener('change', handleSelectionChange);
+            });
 
-                    if (selectedCheckbox && priceElement) {
-                        const jenisHarga = selectedCheckbox.getAttribute('data-jenis-harga');
-                        if (jenisHarga) {
-                            const formattedPrice = new Intl.NumberFormat('id-ID').format(jenisHarga);
-                            priceElement.textContent = 'Rp. ' + formattedPrice;
-                        }
+            // --- Kontrol Kuantitas ---
+            if (btnInc) {
+                btnInc.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const stock = parseInt(stockElement.textContent, 10) || 0;
+                    let val = parseInt(qtyInput.value, 10) || 0;
+                    if (val < stock) {
+                        qtyInput.value = val + 1;
+                        updateQuantityControls(stock);
+                    } else {
+                        alert('Stok tidak cukup. Sisa stok: ' + stock);
                     }
-                }
+                });
+            }
 
-                // Fungsi untuk update sisa stok berdasarkan jenis yang dipilih atau produk utama
-                function updateStock() {
-                    const stockElement = document.getElementById('stock-count');
-                    if (!stockElement) return;
-
-                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
-                    let stok = null;
-
-                    if (selectedCheckbox) {
-                        stok = selectedCheckbox.getAttribute('data-jenis-jumlah');
-                    } else if (btnAddToCart) {
-                        stok = btnAddToCart.getAttribute('data-product-jumlah');
+            if (btnDec) {
+                btnDec.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let val = parseInt(qtyInput.value, 10) || 1;
+                    if (val > 1) {
+                        qtyInput.value = val - 1;
+                        const stock = parseInt(stockElement.textContent, 10) || 0;
+                        updateQuantityControls(stock);
                     }
+                });
+            }
 
-                    if (stok === null || stok === undefined) {
-                        stok = 0;
-                    }
-
-                    stockElement.textContent = stok;
-
-                    // update quantity controls (buttons and input) based on stok
-                    updateQuantityControls(parseInt(stok || 0, 10));
-                }
-
-                // Helper: ambil stok yang tersedia (number)
-                function getAvailableStock() {
-                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
-                    if (selectedCheckbox) {
-                        return parseInt(selectedCheckbox.getAttribute('data-jenis-jumlah') || 0, 10);
-                    }
-                    if (btnAddToCart) {
-                        return parseInt(btnAddToCart.getAttribute('data-product-jumlah') || 0, 10);
-                    }
-                    return 0;
-                }
-
-                // Update controls: enable/disable increase/decrease, clamp quantity, manage add-to-cart
-                function updateQuantityControls(stock) {
-                    const qtyInput = document.querySelector('.quantity-product');
-                    const btnInc = document.querySelector('.btn-increase');
-                    const btnDec = document.querySelector('.btn-decrease');
-
-                    if (!qtyInput) return;
-
-                    let val = parseInt(qtyInput.value, 10);
-                    if (isNaN(val) || val < 1) val = 1;
-
+            if (qtyInput) {
+                qtyInput.addEventListener('input', function() {
+                    const stock = parseInt(stockElement.textContent, 10) || 0;
+                    let val = parseInt(this.value.replace(/\D/g, ''), 10) || 1;
                     if (stock <= 0) {
-                        // jika stok habis, tampilkan 0. Keep increase button clickable so we can show alert.
-                        qtyInput.value = 0;
-                        if (btnDec) btnDec.disabled = true;
-                        if (btnAddToCart) {
-                            btnAddToCart.style.pointerEvents = 'none';
-                            btnAddToCart.style.opacity = '0.6';
-                            btnAddToCart.setAttribute('aria-disabled', 'true');
-                            // ubah teks sementara untuk memberi tahu habis
-                            btnAddToCart.dataset._originalText = btnAddToCart.textContent.trim();
-                            btnAddToCart.textContent = 'Habis';
-                        }
+                        this.value = 0;
+                    } else if (val > stock) {
+                        this.value = stock;
+                        alert('Jumlah melebihi stok tersedia. Sisa stok: ' + stock);
+                    } else if (val < 1) {
+                        this.value = 1;
+                    } else {
+                        this.value = val;
+                    }
+                    updateQuantityControls(stock);
+                });
+            }
+            
+            // --- Logika Tombol Aksi (Add to Cart & Buy Now) ---
+            [btnAddToCart, btnBuyNow].forEach(btn => {
+                if (!btn) return;
+                
+                const isBuyNow = btn.classList.contains('btn-buy-now');
+
+                btn.addEventListener('click', function(e) {
+                    const hasSelectedVariant = btn.hasAttribute('data-product-jenis-id');
+                    if (!hasSelectedVariant) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert('Silakan pilih variasi produk terlebih dahulu.');
                         return;
                     }
 
-                    // jika stok ada, pastikan qty tidak lebih dari stok
-                    if (val > stock) val = stock;
-                    qtyInput.value = val;
+                    const stock = parseInt(btn.getAttribute('data-product-stok'), 10) || 0;
+                    const qty = parseInt(qtyInput.value, 10) || 0;
 
-                    // Keep increase clickable to allow showing an alert when at max
-                    if (btnInc) btnInc.disabled = false;
-                    if (btnDec) btnDec.disabled = (val <= 1);
-
-                    if (btnAddToCart) {
-                        btnAddToCart.style.pointerEvents = '';
-                        btnAddToCart.style.opacity = '';
-                        btnAddToCart.removeAttribute('aria-disabled');
-                        if (btnAddToCart.dataset._originalText) {
-                            // restore original label if sebelumnya diubah
-                            btnAddToCart.textContent = btnAddToCart.dataset._originalText;
-                            delete btnAddToCart.dataset._originalText;
-                        }
-                    }
-                }
-
-                // Fungsi untuk update nama jenis di judul produk
-                function updateProductName() {
-                    const selectedCheckbox = document.querySelector('.jenis-checkbox:checked');
-                    const jenisNameElement = document.getElementById('selected-jenis-name');
-
-                    if (selectedCheckbox && jenisNameElement) {
-                        const jenisNama = selectedCheckbox.getAttribute('data-jenis-nama');
-                        const jenisWarna = selectedCheckbox.getAttribute('data-jenis-warna');
-                        const jenisUkuran = selectedCheckbox.getAttribute('data-jenis-ukuran');
-
-                        let displayText = ` - ${jenisNama}`;
-
-                        // if (jenisWarna && jenisUkuran) {
-                        //     displayText = ` - ${jenisWarna} ${jenisUkuran}`;
-                        // } else if (jenisWarna) {
-                        //     displayText = ` - ${jenisWarna}`;
-                        // } else if (jenisUkuran) {
-                        //     displayText = ` - ${jenisUkuran}`;
-                        // } else if (jenisNama) {
-                        //     displayText = ` - ${jenisNama}`;
-                        // }
-
-                        jenisNameElement.textContent = displayText;
-                    } else if (jenisNameElement) {
-                        jenisNameElement.textContent = '';
-                    }
-                }
-
-                // Fungsi untuk update gambar pada tombol keranjang
-                function updateCartImage() {
-                    if (!btnAddToCart) return;
-
-                    const selectedJenis = getSelectedJenis();
-
-                    if (selectedJenis && selectedJenis.id) {
-                        const swiperMain = document.querySelector('#gallery-swiper-started');
-                        if (swiperMain) {
-                            const targetSlide = swiperMain.querySelector('.swiper-slide[data-jenis-id="' +
-                                selectedJenis.id + '"]');
-                            if (targetSlide) {
-                                const img = targetSlide.querySelector('img');
-                                if (img) {
-                                    const imgSrc = img.getAttribute('src') || img.getAttribute('data-src');
-                                    if (imgSrc) {
-                                        btnAddToCart.setAttribute('data-product-gambar', imgSrc);
-                                    }
-                                }
-                            }
-                        }
-                        // Simpan jenis yang dipilih ke data attribute
-                        btnAddToCart.setAttribute('data-product-jenis-id', selectedJenis.id);
-                        btnAddToCart.setAttribute('data-product-jenis-nama', selectedJenis.nama);
-
-                        // Update harga dan nama produk
-                        updatePrice();
-                        updateProductName();
-                        updateStock();
-                    } else {
-                        // Jika tidak ada jenis yang dipilih, gunakan gambar default (gambar produk pertama)
-                        btnAddToCart.removeAttribute('data-product-jenis-id');
-                        btnAddToCart.removeAttribute('data-product-jenis-nama');
-                        updateProductName();
-                        updateStock();
-                    }
-                }
-
-                // Fungsi untuk memilih checkbox berdasarkan ID
-                function selectJenisById(id) {
-                    const checkbox = document.querySelector('.jenis-checkbox[value="' + id + '"]');
-                    if (checkbox) {
-                        // Uncheck semua checkbox lainnya
-                        jenisCheckboxes.forEach(cb => {
-                            if (cb !== checkbox) {
-                                cb.checked = false;
-                            }
-                        });
-                        // Check checkbox yang dipilih
-                        checkbox.checked = true;
-                        // Update slider dan cart image
-                        updateSliderByJenis(id);
-                        updateCartImage();
-                    }
-                }
-
-                // Event listener untuk setiap checkbox
-                jenisCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        if (this.checked) {
-                            // Uncheck semua checkbox lainnya
-                            jenisCheckboxes.forEach(cb => {
-                                if (cb !== this) {
-                                    cb.checked = false;
-                                }
-                            });
-                            // Update slider dan cart image
-                            updateSliderByJenis(this.value);
-                            updateCartImage();
-                        } else {
-                            // Jika di-uncheck, reset ke gambar default
-                            updateCartImage();
-                        }
-                    });
-                });
-
-                // Quantity controls: increase / decrease / manual input
-                const qtyInput = document.querySelector('.quantity-product');
-                const btnInc = document.querySelector('.btn-increase');
-                const btnDec = document.querySelector('.btn-decrease');
-
-                if (btnInc) {
-                    btnInc.addEventListener('click', function(e) {
+                    if (stock <= 0 || qty <= 0) {
                         e.preventDefault();
-                        const stock = getAvailableStock();
-                        let val = parseInt(qtyInput.value, 10) || 1;
-                        if (val < stock) {
-                            val += 1;
-                            qtyInput.value = val;
-                        } else {
-                            alert('Stok tidak cukup. Sisa stok: ' + stock);
-                        }
-                        updateQuantityControls(stock);
-                    });
-                }
-
-                if (btnDec) {
-                    btnDec.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        alert('Stok produk tidak tersedia atau jumlah tidak valid.');
+                        return;
+                    }
+                    if (qty > stock) {
                         e.preventDefault();
-                        let val = parseInt(qtyInput.value, 10) || 1;
-                        if (val > 1) {
-                            val -= 1;
-                            qtyInput.value = val;
-                        }
-                        updateQuantityControls(getAvailableStock());
-                    });
-                }
+                        e.stopPropagation();
+                        alert('Jumlah yang dipilih melebihi sisa stok (' + stock + ').');
+                        return;
+                    }
 
-                if (qtyInput) {
-                    qtyInput.addEventListener('input', function() {
-                        // hanya angka
-                        const cleaned = this.value.replace(/\D/g, '');
-                        let val = parseInt(cleaned, 10) || 1;
-                        const stock = getAvailableStock();
-                        if (val > stock) {
-                            this.value = stock;
-                            alert('Jumlah melebihi stok tersedia. Sisa stok: ' + stock);
-                        } else if (val < 1) {
-                            this.value = 1;
-                        } else {
-                            this.value = val;
-                        }
-                        updateQuantityControls(stock);
-                    });
-                }
-
-                // Klik pada thumbnail -> pilih jenis jika slide punya data-jenis-id
-                const thumbsContainer = document.querySelector('.tf-product-media-thumbs');
-                if (thumbsContainer) {
-                    thumbsContainer.addEventListener('click', function(e) {
-                        const slide = e.target.closest('.swiper-slide');
-                        if (!slide) return;
-                        const jenisId = slide.getAttribute('data-jenis-id');
-                        if (jenisId) {
-                            selectJenisById(jenisId);
-                        }
-                    });
-                }
-
-                // Klik pada main slide -> pilih jenis jika slide punya data-jenis-id
-                const mainSwiper = document.querySelector('#gallery-swiper-started');
-                if (mainSwiper) {
-                    mainSwiper.addEventListener('click', function(e) {
-                        const slide = e.target.closest('.swiper-slide');
-                        if (!slide) return;
-                        const jenisId = slide.getAttribute('data-jenis-id');
-                        if (jenisId) {
-                            selectJenisById(jenisId);
-                        }
-                    });
-                }
-
-                // Update gambar dan nama saat halaman pertama kali dimuat (jika ada jenis terpilih)
-                updateCartImage();
-                updateProductName();
-
-                // ensure quantity controls reflect initial stock on load
-                updateStock();
-
-                // Intercept add-to-cart to validate stock before opening cart offcanvas
-                if (btnAddToCart) {
-                    btnAddToCart.addEventListener('click', function(e) {
-                        const stock = getAvailableStock();
-                        const qty = parseInt(document.querySelector('.quantity-product').value, 10) || 0;
-                        if (stock <= 0) {
-                            e.preventDefault();
-                            alert('Stok produk habis.');
-                            return;
-                        }
-                        if (qty <= 0) {
-                            e.preventDefault();
-                            alert('Jumlah minimal adalah 1.');
-                            return;
-                        }
-                        if (qty > stock) {
-                            e.preventDefault();
-                            alert('Jumlah yang dipilih melebihi sisa stok (' + stock + ').');
-                            return;
-                        }
-                        // otherwise allow add-to-cart to proceed (offcanvas)
-                    });
-                }
-
-                // Buy Now: langsung ke checkout dengan satu item di cart (localStorage)
-                const btnBuyNow = document.querySelector('.btn-buy-now');
-                if (btnBuyNow) {
-                    btnBuyNow.addEventListener('click', function(e) {
+                    // Jika ini tombol Beli Sekarang, handle redirect
+                    if (isBuyNow) {
                         e.preventDefault();
-
-                        const stock = getAvailableStock();
-                        let qty = parseInt(document.querySelector('.quantity-product').value, 10) || 1;
-
-                        if (stock <= 0) {
-                            alert('Stok produk habis.');
-                            return;
-                        }
-                        if (qty <= 0) {
-                            alert('Jumlah minimal adalah 1.');
-                            return;
-                        }
-                        if (qty > stock) {
-                            alert('Jumlah yang dipilih melebihi sisa stok (' + stock + ').');
-                            qty = stock;
-                            document.querySelector('.quantity-product').value = qty;
-                            updateQuantityControls(stock);
-                            return;
-                        }
-
-                        // Build product object same shape as cart.js expects
                         const product = {
-                            id: parseInt(btnBuyNow.dataset.productId),
-                            nama: btnBuyNow.dataset.productNama,
-                            harga: parseInt(btnBuyNow.dataset.productHarga),
-                            gambar: btnBuyNow.dataset.productGambar,
-                            kategori: btnBuyNow.dataset.productKategori,
+                            id: parseInt(btn.dataset.productId),
+                            nama: btn.dataset.productNama,
+                            harga: parseInt(btn.dataset.productHarga),
+                            gambar: btn.dataset.productGambar,
+                            kategori: btn.dataset.productKategori,
                             quantity: qty,
-                            jenis_id: null,
-                            jenis_nama: null,
+                            jenis_id: parseInt(btn.dataset.productJenisId),
+                            jenis_nama: btn.dataset.productJenisNama,
                         };
-
-                        // If a variant is selected, include it and adjust price if variant has price
-                        const selectedJenis = document.querySelector('.jenis-checkbox:checked');
-                        if (selectedJenis) {
-                            product.jenis_id = parseInt(selectedJenis.value);
-                            product.jenis_nama = selectedJenis.getAttribute('data-jenis-nama');
-                            const jenisHarga = selectedJenis.getAttribute('data-jenis-harga');
-                            if (jenisHarga) product.harga = parseInt(jenisHarga);
-                        }
-
-                        // Save single-item cart to localStorage and redirect to checkout
                         try {
                             localStorage.setItem('ria_shopping_cart', JSON.stringify([product]));
                             window.location.href = '{{ route("checkout") }}';
@@ -781,28 +655,37 @@
                             console.error('Gagal menyimpan cart ke localStorage', err);
                             alert('Terjadi kesalahan saat memproses pembelian. Coba lagi.');
                         }
-                    });
-                }
+                    }
+                    // Jika ini tombol Add to Cart, biarkan event default (buka offcanvas) berjalan
+                });
             });
 
-            function minPembelian(){
-                const minBeli = document.querySelector('.btn-add-to-cart').getAttribute('data-min-beli');
-                const quantityInput = document.querySelector('.quantity-product');
-                let currentQty = parseInt(quantityInput.value, 10) || 1;
-                if(currentQty < minBeli){
-                    const ok = confirm('Jumlah pembelian minimal adalah ' + minBeli + '.\nTekan OK untuk melanjutkan pembelian, atau Batal untuk membatalkan.');
-                    if (ok) {
-                        quantityInput.value = minBeli;
-                        // perbarui kontrol & stok (jika ada fungsi pembantu)
-                        const stock = parseInt(document.getElementById('stock-count').textContent, 10) || 0;
+            initialize();
+        });
+
+        // Fungsi minPembelian tetap ada jika masih relevan
+        function minPembelian(){
+            const minBeli = document.querySelector('.btn-add-to-cart')?.getAttribute('data-min-beli') || 1;
+            const quantityInput = document.querySelector('.quantity-product');
+            if (!quantityInput) return true;
+
+            let currentQty = parseInt(quantityInput.value, 10) || 1;
+            if(currentQty < minBeli){
+                const ok = confirm('Jumlah pembelian minimal adalah ' + minBeli + '.\nTekan OK untuk melanjutkan pembelian, atau Batal untuk membatalkan.');
+                if (ok) {
+                    quantityInput.value = minBeli;
+                    const stock = parseInt(document.getElementById('stock-count').textContent, 10) || 0;
+                    // Panggil fungsi update quantity controls jika ada
+                    if (typeof updateQuantityControls === 'function') {
                         updateQuantityControls(stock);
-                        return true;
-                    } else {
-                        // user memilih Batal — biarkan saja agar mereka bisa ubah manual
-                        return false;
                     }
+                    return true;
+                } else {
+                    return false; // Mencegah aksi selanjutnya jika dibatalkan
                 }
             }
+            return true; // Lanjutkan jika kuantitas sudah memenuhi
+        }
         </script>
     @endpush
 @endsection

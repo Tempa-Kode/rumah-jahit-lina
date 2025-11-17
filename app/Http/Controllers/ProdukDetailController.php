@@ -14,13 +14,32 @@ class ProdukDetailController extends Controller
         $produk = Produk::with(['kategori', 'gambarProduk', 'jenisProduk', 'itemTransaksi.invoice'])
             ->findOrFail($id);
 
-        // Set jenis produk terpilih default (jenis pertama yang ada stok)
+        // Olah jenis produk untuk view
+        $jenisProdukGrouped = [
+            'nama' => [],
+            'warna' => [],
+            'ukuran' => [],
+        ];
         if ($produk->jenisProduk->count() > 0) {
-            $jenisTerpilih = $produk->jenisProduk->where('jumlah_produk', '>', 0)->first();
-            $produk->jenisProdukTerpilih = $jenisTerpilih ? $jenisTerpilih->id_jenis_produk : $produk->jenisProduk->first()->id_jenis_produk;
-        } else {
-            $produk->jenisProdukTerpilih = null;
+            // Ambil semua nilai unik untuk setiap atribut
+            $jenisProdukGrouped['nama'] = $produk->jenisProduk->pluck('nama')->unique()->filter()->values();
+            $jenisProdukGrouped['warna'] = $produk->jenisProduk->pluck('warna')->unique()->filter()->values();
+            $jenisProdukGrouped['ukuran'] = $produk->jenisProduk->pluck('ukuran')->unique()->filter()->values();
         }
+        
+        // Konversi semua variasi ke JSON untuk digunakan di JavaScript
+        $semuaVariasiJson = $produk->jenisProduk->map(function ($jenis) {
+            return [
+                'id' => $jenis->id_jenis_produk,
+                'nama' => $jenis->nama,
+                'warna' => $jenis->warna,
+                'ukuran' => $jenis->ukuran,
+                'harga' => $jenis->harga,
+                'stok' => $jenis->jumlah_produk,
+                'gambar' => asset($jenis->path_gambar)
+            ];
+        })->toJson();
+
 
         // Ambil produk terkait (dari kategori yang sama, kecuali produk ini)
         $produkTerkait = Produk::with(['kategori', 'gambarProduk', 'jenisProduk'])
@@ -71,6 +90,19 @@ class ProdukDetailController extends Controller
                 ->first();
         }
 
-        return view('produk-detail', compact('produk', 'produkTerkait', 'produkSerupa', 'kategori', 'ulasanRatings', 'averageRating', 'totalReviews', 'userReview', 'ratingDistribution', 'ratingPercentages'));
+        return view('produk-detail', compact(
+            'produk', 
+            'produkTerkait', 
+            'produkSerupa', 
+            'kategori', 
+            'ulasanRatings', 
+            'averageRating', 
+            'totalReviews', 
+            'userReview', 
+            'ratingDistribution', 
+            'ratingPercentages',
+            'jenisProdukGrouped',
+            'semuaVariasiJson'
+        ));
     }
 }

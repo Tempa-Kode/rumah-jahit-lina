@@ -90,11 +90,27 @@
                                         </tr>
                                         <tr>
                                             <td>Status Pengiriman</td>
+                                            @php
+                                                $statusPengiriman = $transaksi->status_pengiriman;
+                                            @endphp
+
                                             <td>:
-                                                @if ($transaksi->status_pengiriman)
-                                                    <span class="badge bg-success">Sudah Dikirim</span>
+                                               @if ($statusPengiriman === "dikirim")
+                                                    <span class="badge badge-success px-20 py-9 radius-4">
+                                                        Sudah Dikirim
+                                                    </span>
+                                                @elseif ($statusPengiriman === "diterima")
+                                                    <span class="badge badge-primary px-20 py-9 radius-4">
+                                                        Diterima
+                                                    </span>
+                                                @elseif ($statusPengiriman === "dibatalkan")
+                                                    <span class="badge badge-danger px-20 py-9 radius-4">
+                                                        Dibatalkan
+                                                    </span>
                                                 @else
-                                                    <span class="badge bg-warning">Belum Dikirim</span>
+                                                    <span class="badge badge-warning px-20 py-9 radius-4">
+                                                        Belum Dikirim
+                                                    </span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -119,16 +135,24 @@
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
                                                 <td>
-                                                    {{ $item->produk->nama }}
+                                                    {{ $item->jenisProduk->produk->nama }}
+                                                    <br>
                                                     @if ($item->jenis_produk_id && $item->jenisProduk)
-                                                        <br><small class="text-muted">Jenis:
-                                                            {{ $item->jenisProduk->nama }}</small>
-                                                    @endif
+                                                    <small class="text-muted">
+                                                        {{ $item->jenisProduk->nama }}
+                                                        @if ($item->jenisProduk->warna)
+                                                            - {{ $item->jenisProduk->warna }}
+                                                        @endif
+                                                        @if ($item->jenisProduk->ukuran)
+                                                            - {{ $item->jenisProduk->ukuran }}
+                                                        @endif
+                                                    </small>
+                                                @endif
                                                 </td>
                                                 <td>{{ $item->jumlah }}</td>
-                                                <td>Rp {{ number_format($item->produk->harga, 0, ",", ".") }}</td>
+                                                <td>Rp {{ number_format($item->jenisProduk->harga, 0, ",", ".") }}</td>
                                                 <td class="text-end">Rp
-                                                    {{ number_format($item->produk->harga * $item->jumlah, 0, ",", ".") }}
+                                                    {{ number_format($item->subtotal, 0, ",", ".") }}
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -198,8 +198,16 @@
                                                     <div>
                                                         <strong>{{ $item->produk->nama }}</strong>
                                                         @if ($item->jenisProduk)
-                                                            <br><small
-                                                                class="text-secondary">{{ $item->jenisProduk->nama }}</small>
+                                                            <br>
+                                                            <small class="text-muted fst-italic">
+                                                                {{ $item->jenisProduk->nama }}
+                                                                @if ($item->jenisProduk->warna)
+                                                                    - {{ $item->jenisProduk->warna }}
+                                                                @endif
+                                                                @if ($item->jenisProduk->ukuran)
+                                                                    - {{ $item->jenisProduk->ukuran }}
+                                                                @endif
+                                                            </small>
                                                         @endif
                                                     </div>
                                                 </div>
