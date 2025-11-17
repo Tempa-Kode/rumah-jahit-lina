@@ -109,10 +109,6 @@
                                             <td>{{ $invoice->alamat }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Ongkir:</strong></td>
-                                            <td>Rp. {{ number_format(num: $invoice->ongkir, decimals: 0, decimal_separator: '.', thousands_separator: '.') }}</td>
-                                        </tr>
-                                        <tr>
                                             <td><strong>Layanan Kurir:</strong></td>
                                             <td>{{ $invoice->kurir }}</td>
                                         </tr>
@@ -244,6 +240,12 @@
                                     @endforeach
                                 </tbody>
                                 <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>Ongkir:</strong></td>
+                                        <td class="text-end">
+                                            Rp. {{ number_format($invoice->ongkir, 0, ",", ".") }}
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td colspan="3" class="text-end"><strong>Total:</strong></td>
                                         <td class="text-end">
