@@ -14,19 +14,40 @@ class ProdukDetailController extends Controller
         $produk = Produk::with(['kategori', 'gambarProduk', 'jenisProduk', 'itemTransaksi.invoice'])
             ->findOrFail($id);
 
-        // Olah jenis produk untuk view
+        // Olah jenis produk untuk view - grouping berdasarkan atribut yang ada
         $jenisProdukGrouped = [
             'nama' => [],
             'warna' => [],
             'ukuran' => [],
         ];
+
         if ($produk->jenisProduk->count() > 0) {
-            // Ambil semua nilai unik untuk setiap atribut
-            $jenisProdukGrouped['nama'] = $produk->jenisProduk->pluck('nama')->unique()->filter()->values();
-            $jenisProdukGrouped['warna'] = $produk->jenisProduk->pluck('warna')->unique()->filter()->values();
-            $jenisProdukGrouped['ukuran'] = $produk->jenisProduk->pluck('ukuran')->unique()->filter()->values();
+            // Ambil semua nilai unik untuk setiap atribut yang terisi
+            $jenisProdukGrouped['nama'] = $produk->jenisProduk
+                ->pluck('nama')
+                ->filter(function($value) {
+                    return !empty($value);
+                })
+                ->unique()
+                ->values();
+
+            $jenisProdukGrouped['warna'] = $produk->jenisProduk
+                ->pluck('warna')
+                ->filter(function($value) {
+                    return !empty($value);
+                })
+                ->unique()
+                ->values();
+
+            $jenisProdukGrouped['ukuran'] = $produk->jenisProduk
+                ->pluck('ukuran')
+                ->filter(function($value) {
+                    return !empty($value);
+                })
+                ->unique()
+                ->values();
         }
-        
+
         // Konversi semua variasi ke JSON untuk digunakan di JavaScript
         $semuaVariasiJson = $produk->jenisProduk->map(function ($jenis) {
             return [
@@ -36,12 +57,11 @@ class ProdukDetailController extends Controller
                 'ukuran' => $jenis->ukuran,
                 'harga' => $jenis->harga,
                 'stok' => $jenis->jumlah_produk,
-                'gambar' => asset($jenis->path_gambar)
+                'gambar' => $jenis->path_gambar ? asset($jenis->path_gambar) : null
             ];
         })->toJson();
 
-
-        // Ambil produk terkait (dari kategori yang sama, kecuali produk ini)
+        // Ambil produk terkait
         $produkTerkait = Produk::with(['kategori', 'gambarProduk', 'jenisProduk'])
             ->where('kategori_id', $produk->kategori_id)
             ->where('id_produk', '!=', $id)
@@ -49,7 +69,7 @@ class ProdukDetailController extends Controller
             ->limit(6)
             ->get();
 
-        // Ambil produk serupa (random dari kategori lain atau semua produk)
+        // Ambil produk serupa
         $produkSerupa = Produk::with(['kategori', 'gambarProduk', 'jenisProduk'])
             ->where('id_produk', '!=', $id)
             ->where('jumlah_produk', '>', 0)
@@ -62,12 +82,12 @@ class ProdukDetailController extends Controller
 
         // Ambil ulasan rating dengan user
         $ulasanRatings = $produk->ulasanRating()->with('user')->latest()->paginate(10);
-        
+
         // Hitung rata-rata rating
         $averageRating = $produk->ulasanRating()->avg('rating') ?? 0;
         $totalReviews = $produk->ulasanRating()->count();
-        
-        // Hitung distribusi rating (5, 4, 3, 2, 1)
+
+        // Hitung distribusi rating
         $ratingDistribution = [
             5 => $produk->ulasanRating()->where('rating', 5)->count(),
             4 => $produk->ulasanRating()->where('rating', 4)->count(),
@@ -75,13 +95,13 @@ class ProdukDetailController extends Controller
             2 => $produk->ulasanRating()->where('rating', 2)->count(),
             1 => $produk->ulasanRating()->where('rating', 1)->count(),
         ];
-        
+
         // Hitung persentase untuk setiap rating
         $ratingPercentages = [];
         foreach ($ratingDistribution as $rating => $count) {
             $ratingPercentages[$rating] = $totalReviews > 0 ? ($count / $totalReviews) * 100 : 0;
         }
-        
+
         // Cek apakah user sudah memberikan ulasan
         $userReview = null;
         if (auth()->check()) {
@@ -91,15 +111,15 @@ class ProdukDetailController extends Controller
         }
 
         return view('produk-detail', compact(
-            'produk', 
-            'produkTerkait', 
-            'produkSerupa', 
-            'kategori', 
-            'ulasanRatings', 
-            'averageRating', 
-            'totalReviews', 
-            'userReview', 
-            'ratingDistribution', 
+            'produk',
+            'produkTerkait',
+            'produkSerupa',
+            'kategori',
+            'ulasanRatings',
+            'averageRating',
+            'totalReviews',
+            'userReview',
+            'ratingDistribution',
             'ratingPercentages',
             'jenisProdukGrouped',
             'semuaVariasiJson'

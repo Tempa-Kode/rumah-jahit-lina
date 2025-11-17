@@ -78,29 +78,52 @@ class ProdukController extends Controller
             }
 
             // Create Jenis Produk
-            if ($request->has('jenis_nama')) {
-                foreach ($request->jenis_nama as $index => $jenisNama) {
-                    if (!empty($jenisNama)) {
-                        $jenisData = [
-                            'produk_id' => $produk->id_produk,
-                            'nama' => $jenisNama,
-                            'warna' => $request->jenis_warna[$index] ?? null,
-                            'ukuran' => $request->jenis_ukuran[$index] ?? null,
-                            'harga' => $request->jenis_harga[$index] ?? 0,
-                            'jumlah_produk' => $request->jenis_jumlah[$index] ?? 0,
-                        ];
+            if ($request->has('jenis_nama') || $request->has('jenis_warna') || $request->has('jenis_ukuran')) {
+                $totalVariants = max(
+                    count($request->jenis_nama ?? []),
+                    count($request->jenis_warna ?? []),
+                    count($request->jenis_ukuran ?? [])
+                );
 
-                        // Upload Gambar Jenis Produk
-                        if ($request->hasFile('jenis_gambar.' . $index)) {
-                            $jenisGambar = $request->file('jenis_gambar')[$index];
-                            $filename = time() . '_' . uniqid() . '.' . $jenisGambar->getClientOriginalExtension();
-                            $jenisGambar->move(public_path('uploads/jenis-produk'), $filename);
-                            $jenisData['path_gambar'] = 'uploads/jenis-produk/' . $filename;
-                        }
+                for ($i = 0; $i < $totalVariants; $i++) {
+                    $jenisNama = $request->jenis_nama[$i] ?? null;
+                    $jenisWarna = $request->jenis_warna[$i] ?? null;
+                    $jenisUkuran = $request->jenis_ukuran[$i] ?? null;
 
-                        $jenisProduk = JenisProduk::create($jenisData);
+                    // Skip jika semua field kosong
+                    if (!$jenisNama && !$jenisWarna && !$jenisUkuran) {
+                        continue;
+                    }
 
-                        // Create Riwayat Stok untuk Jenis Produk
+                    // Generate nama otomatis jika tidak ada
+                    if (!$jenisNama) {
+                        $namaParts = [];
+                        if ($jenisWarna) $namaParts[] = $jenisWarna;
+                        if ($jenisUkuran) $namaParts[] = $jenisUkuran;
+                        $jenisNama = implode(' - ', $namaParts);
+                    }
+
+                    $jenisData = [
+                        'produk_id' => $produk->id_produk,
+                        'nama' => $jenisNama,
+                        'warna' => $jenisWarna,
+                        'ukuran' => $jenisUkuran,
+                        'harga' => $request->jenis_harga[$i] ?? 0,
+                        'jumlah_produk' => $request->jenis_jumlah[$i] ?? 0,
+                    ];
+
+                    // Upload Gambar Jenis Produk
+                    if ($request->hasFile('jenis_gambar.' . $i)) {
+                        $jenisGambar = $request->file('jenis_gambar')[$i];
+                        $filename = time() . '_' . uniqid() . '.' . $jenisGambar->getClientOriginalExtension();
+                        $jenisGambar->move(public_path('uploads/jenis-produk'), $filename);
+                        $jenisData['path_gambar'] = 'uploads/jenis-produk/' . $filename;
+                    }
+
+                    $jenisProduk = JenisProduk::create($jenisData);
+
+                    // Create Riwayat Stok untuk Jenis Produk
+                    if ($jenisData['jumlah_produk'] > 0) {
                         RiwayatStokProduk::create([
                             'produk_id' => $produk->id_produk,
                             'jenis_produk_id' => $jenisProduk->id_jenis_produk,
@@ -220,10 +243,23 @@ class ProdukController extends Controller
                         $stokLamaJenis = $jenis->jumlah_produk;
                         $stokBaruJenis = $request->jenis_existing_jumlah[$index] ?? 0;
 
+                        // Get nama, warna, ukuran
+                        $jenisNama = $request->jenis_existing_nama[$index] ?? null;
+                        $jenisWarna = $request->jenis_existing_warna[$index] ?? null;
+                        $jenisUkuran = $request->jenis_existing_ukuran[$index] ?? null;
+
+                        // Auto-generate nama jika kosong tapi ada warna/ukuran
+                        if (!$jenisNama && ($jenisWarna || $jenisUkuran)) {
+                            $namaParts = [];
+                            if ($jenisWarna) $namaParts[] = $jenisWarna;
+                            if ($jenisUkuran) $namaParts[] = $jenisUkuran;
+                            $jenisNama = implode(' - ', $namaParts);
+                        }
+
                         $updateData = [
-                            'nama' => $request->jenis_existing_nama[$index],
-                            'warna' => $request->jenis_existing_warna[$index] ?? null,
-                            'ukuran' => $request->jenis_existing_ukuran[$index] ?? null,
+                            'nama' => $jenisNama,
+                            'warna' => $jenisWarna,
+                            'ukuran' => $jenisUkuran,
                             'harga' => $request->jenis_existing_harga[$index] ?? 0,
                             'jumlah_produk' => $stokBaruJenis,
                         ];
@@ -263,42 +299,63 @@ class ProdukController extends Controller
             }
 
             // Tambah Jenis Produk Baru
-            if ($request->has('jenis_nama')) {
-                foreach ($request->jenis_nama as $index => $jenisNama) {
-                    if (!empty($jenisNama)) {
-                        $jenisData = [
-                            'nama' => $jenisNama,
-                            'warna' => $request->jenis_warna[$index] ?? null,
-                            'ukuran' => $request->jenis_ukuran[$index] ?? null,
-                            'harga' => $request->jenis_harga[$index] ?? 0,
-                            'jumlah_produk' => $request->jenis_jumlah[$index] ?? 0,
-                        ];
+            if ($request->has('jenis_nama') || $request->has('jenis_warna') || $request->has('jenis_ukuran')) {
+                $totalVariants = max(
+                    count($request->jenis_nama ?? []),
+                    count($request->jenis_warna ?? []),
+                    count($request->jenis_ukuran ?? [])
+                );
 
-                        // Upload Gambar Jenis Produk
-                        if ($request->hasFile('jenis_gambar.' . $index)) {
-                            $jenisGambar = $request->file('jenis_gambar')[$index];
-                            $filename = time() . '_' . uniqid() . '.' . $jenisGambar->getClientOriginalExtension();
-                            $jenisGambar->move(public_path('uploads/jenis-produk'), $filename);
-                            $jenisData['path_gambar'] = 'uploads/jenis-produk/' . $filename;
-                        }
+                for ($i = 0; $i < $totalVariants; $i++) {
+                    $jenisNama = $request->jenis_nama[$i] ?? null;
+                    $jenisWarna = $request->jenis_warna[$i] ?? null;
+                    $jenisUkuran = $request->jenis_ukuran[$i] ?? null;
 
-                        $jenisProduk = JenisProduk::create([
+                    // Skip jika semua field kosong
+                    if (!$jenisNama && !$jenisWarna && !$jenisUkuran) {
+                        continue;
+                    }
+
+                    // Auto-generate nama jika kosong tapi ada warna/ukuran
+                    if (!$jenisNama && ($jenisWarna || $jenisUkuran)) {
+                        $namaParts = [];
+                        if ($jenisWarna) $namaParts[] = $jenisWarna;
+                        if ($jenisUkuran) $namaParts[] = $jenisUkuran;
+                        $jenisNama = implode(' - ', $namaParts);
+                    }
+
+                    $jenisData = [
+                        'nama' => $jenisNama,
+                        'warna' => $jenisWarna,
+                        'ukuran' => $jenisUkuran,
+                        'harga' => $request->jenis_harga[$i] ?? 0,
+                        'jumlah_produk' => $request->jenis_jumlah[$i] ?? 0,
+                    ];
+
+                    // Upload Gambar Jenis Produk
+                    if ($request->hasFile('jenis_gambar.' . $i)) {
+                        $jenisGambar = $request->file('jenis_gambar')[$i];
+                        $filename = time() . '_' . uniqid() . '.' . $jenisGambar->getClientOriginalExtension();
+                        $jenisGambar->move(public_path('uploads/jenis-produk'), $filename);
+                        $jenisData['path_gambar'] = 'uploads/jenis-produk/' . $filename;
+                    }
+
+                    $jenisProduk = JenisProduk::create([
+                        'produk_id' => $produk->id_produk,
+                        ...$jenisData
+                    ]);
+
+                    // Create Riwayat Stok untuk Jenis Produk Baru (jika ada stok)
+                    if ($jenisData['jumlah_produk'] > 0) {
+                        RiwayatStokProduk::create([
                             'produk_id' => $produk->id_produk,
-                            ...$jenisData
+                            'jenis_produk_id' => $jenisProduk->id_jenis_produk,
+                            'tanggal' => now(),
+                            'stok_awal' => 0,
+                            'stok_masuk' => $jenisData['jumlah_produk'],
+                            'stok_keluar' => 0,
+                            'stok_akhir' => $jenisData['jumlah_produk'],
                         ]);
-
-                        // Create Riwayat Stok untuk Jenis Produk Baru (jika ada stok)
-                        if ($jenisData['jumlah_produk'] > 0) {
-                            RiwayatStokProduk::create([
-                                'produk_id' => $produk->id_produk,
-                                'jenis_produk_id' => $jenisProduk->id_jenis_produk,
-                                'tanggal' => now(),
-                                'stok_awal' => 0,
-                                'stok_masuk' => $jenisData['jumlah_produk'],
-                                'stok_keluar' => 0,
-                                'stok_akhir' => $jenisData['jumlah_produk'],
-                            ]);
-                        }
                     }
                 }
             }

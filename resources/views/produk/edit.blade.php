@@ -199,36 +199,34 @@
                                                         value="{{ $jenis->id_jenis_produk }}">
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Nama
-                                                                Jenis</label>
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                                                Nama Jenis <small class="text-secondary-light">(Opsional)</small>
+                                                            </label>
                                                             <input type="text" class="form-control radius-8"
                                                                 name="jenis_existing_nama[]" value="{{ $jenis->nama }}"
-                                                                placeholder="Contoh: Ukuran L Merah">
+                                                                placeholder="Contoh: Hitam 4 Inch">
+                                                            <small class="text-secondary-light">Kosongkan untuk auto-generate dari warna/ukuran</small>
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Warna</label>
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Warna</label>
                                                             <input type="text" class="form-control radius-8"
                                                                 name="jenis_existing_warna[]" value="{{ $jenis->warna }}"
-                                                                placeholder="Contoh: Merah">
+                                                                placeholder="Contoh: Hitam">
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Ukuran</label>
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Ukuran</label>
                                                             <input type="text" class="form-control radius-8"
                                                                 name="jenis_existing_ukuran[]"
-                                                                value="{{ $jenis->ukuran }}" placeholder="Contoh: L, XL">
+                                                                value="{{ $jenis->ukuran }}" placeholder="Contoh: 4 Inch">
                                                         </div>
                                                     </div>
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Harga
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Harga
                                                                 <span class="text-danger-600">*</span></label>
                                                             <input type="number" class="form-control radius-8"
                                                                 name="jenis_existing_harga[]" value="{{ $jenis->harga }}"
@@ -237,8 +235,7 @@
                                                     </div>
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Jumlah
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Jumlah
                                                                 Stok</label>
                                                             <input type="number" class="form-control radius-8"
                                                                 name="jenis_existing_jumlah[]"
@@ -248,8 +245,7 @@
                                                     </div>
                                                     <div class="col-sm-4">
                                                         <div class="mb-2">
-                                                            <label
-                                                                class="form-label fw-semibold text-primary-light text-sm mb-8">Gambar
+                                                            <label class="form-label fw-semibold text-primary-light text-sm mb-8">Gambar
                                                                 Baru (Opsional)</label>
                                                             <input type="file"
                                                                 class="form-control radius-8 jenis-existing-gambar"
@@ -262,8 +258,7 @@
                                                     <div class="col-sm-12">
                                                         @if ($jenis->path_gambar)
                                                             <div class="mb-2">
-                                                                <label
-                                                                    class="form-label fw-semibold text-primary-light text-sm mb-2">Gambar
+                                                                <label class="form-label fw-semibold text-primary-light text-sm mb-2">Gambar
                                                                     Saat Ini:</label>
                                                                 <img src="{{ asset($jenis->path_gambar) }}"
                                                                     class="w-25 h-100-px rounded border d-block">
@@ -281,7 +276,12 @@
                             <!-- Tambah Jenis Baru -->
                             <div class="row mb-4">
                                 <div class="col-12 d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-semibold mb-0 text-primary-600">Tambah Jenis/Variasi Baru</h6>
+                                    <div>
+                                        <h6 class="fw-semibold mb-1 text-primary-600">Tambah Jenis/Variasi Baru</h6>
+                                        <p class="text-sm text-secondary-light mb-0">
+                                            Tambahkan variasi baru. Nama jenis akan otomatis dibuat dari warna/ukuran jika dikosongkan.
+                                        </p>
+                                    </div>
                                     <button type="button" class="btn btn-sm btn-primary radius-8" id="tambah-jenis">
                                         Tambah Jenis
                                     </button>
@@ -408,20 +408,24 @@
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div class="mb-20">
-                                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">Nama Jenis</label>
-                                        <input type="text" class="form-control radius-8" name="jenis_nama[]" placeholder="Contoh: Ukuran L Biru">
+                                        <label class="form-label fw-semibold text-primary-light text-sm mb-8">
+                                            Nama Jenis <small class="text-secondary-light">(Opsional)</small>
+                                        </label>
+                                        <input type="text" class="form-control radius-8" name="jenis_nama[]"
+                                            placeholder="Contoh: Hitam 4 Inch">
+                                        <small class="text-secondary-light">Kosongkan untuk auto-generate dari warna/ukuran</small>
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
                                     <div class="mb-20">
                                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Warna</label>
-                                        <input type="text" class="form-control radius-8" name="jenis_warna[]" placeholder="Contoh: Biru">
+                                        <input type="text" class="form-control radius-8" name="jenis_warna[]" placeholder="Contoh: Hitam">
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
                                     <div class="mb-20">
                                         <label class="form-label fw-semibold text-primary-light text-sm mb-8">Ukuran</label>
-                                        <input type="text" class="form-control radius-8" name="jenis_ukuran[]" placeholder="Contoh: L, XL">
+                                        <input type="text" class="form-control radius-8" name="jenis_ukuran[]" placeholder="Contoh: 4 Inch">
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
