@@ -59,7 +59,7 @@ class HomeController extends Controller
 
         // Pagination dengan jumlah yang bisa dipilih
         $perPage = $request->get('show', 50);
-        $produk = $query->paginate($perPage)->appends($request->except('page'));
+        $produk = $query->simplePaginate($perPage)->withQueryString();
 
         return view('index', compact('kategori', 'produk'));
     }
