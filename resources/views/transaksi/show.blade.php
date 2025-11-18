@@ -224,15 +224,11 @@
                             </label>
                             <select class="form-select radius-8" name="status_pengiriman" required>
                                 <option value="">Pilih Status</option>
-                                <option value="pending"
-                                    {{ $transaksi->status_pengiriman === "pending" ? "selected" : "" }}>
-                                    Belum Dikirim</option>
-                                <option value="dikirim"
-                                    {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
-                                    Sudah Dikirim</option>
-                                <option value="diterima"
-                                    {{ $transaksi->status_pengiriman === "diterima" ? "selected" : "" }}>
-                                    Diterima</option>
+                                @if ($transaksi->status_pengiriman == "pending")
+                                    <option value="dikirim"
+                                        {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
+                                        Sudah Dikirim</option>
+                                @endif
                                 <option value="dibatalkan"
                                     {{ $transaksi->status_pengiriman === "dibatalkan" ? "selected" : "" }}>
                                     Dibatalkan</option>
