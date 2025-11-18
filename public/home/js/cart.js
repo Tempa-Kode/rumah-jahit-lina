@@ -342,7 +342,29 @@ class ShoppingCart {
         document.querySelectorAll(".btn-add-to-cart").forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 e.preventDefault();
+                const minBeli = document.querySelector('.btn-add-to-cart')?.getAttribute('data-min-beli') || 1;
+                const quantityInput = document.querySelector('.quantity-product');
+                console.log(minBeli)
+                if (!quantityInput) return true;
+
+                let currentQty = parseInt(quantityInput.value, 10) || 1;
+                if (currentQty < minBeli) {
+                    const ok = confirm('Jumlah pembelian minimal adalah ' + minBeli +
+                        '.\nTekan OK untuk melanjutkan pembelian, atau Batal untuk membatalkan.');
+                    if (ok) {
+                        quantityInput.value = minBeli;
+                        const stock = parseInt(document.getElementById('stock-count').textContent, 10) || 0;
+                        // Panggil fungsi update quantity controls jika ada
+                        if (typeof updateQuantityControls === 'function') {
+                            updateQuantityControls(stock);
+                        }
+                        return true;
+                    } else {
+                        return false; // Mencegah aksi selanjutnya jika dibatalkan
+                    }
+                }
                 this.handleAddToCart(btn);
+                // return true; // Lanjutkan jika kuantitas sudah memenuhi
             });
         });
     }

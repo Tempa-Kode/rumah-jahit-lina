@@ -290,7 +290,7 @@
                                                         data-product-stok="{{ $initialStock }}"
                                                         data-min-beli="{{ $produk->min_beli ?? 1 }}"
                                                         data-has-variants="{{ $produk->jenisProduk->count() > 0 ? "true" : "false" }}"
-                                                        onclick="minPembelian()">
+                                                        >
                                                         Tambah Keranjang
                                                         <i class="icon-cart-2"></i>
                                                     </a>
@@ -306,7 +306,7 @@
                                                         data-product-stok="{{ $initialStock }}"
                                                         data-min-beli="{{ $produk->min_beli ?? 1 }}"
                                                         data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
-                                                        onclick="minPembelian()">
+                                                        >
                                                         Beli Sekarang
                                                     </button>
                                                 </div>
