@@ -1,5 +1,5 @@
 @extends("template")
-@section("title", "Konfirmasi Pesanan - Aksesoris Ria")
+@section("title", "Konfirmasi Pesanan - Rj Lina")
 
 @section("body")
     <!-- Breakcrumbs -->
