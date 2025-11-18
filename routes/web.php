@@ -32,6 +32,9 @@ Route::middleware('auth')->prefix('akun')->name('akun.')->group(function () {
     Route::post('/edit', [App\Http\Controllers\AkunController::class, 'update'])->name('update');
 });
 
+// Product Detail Routes
+Route::get('produk/detail/{id}', [App\Http\Controllers\ProdukDetailController::class, 'show'])->name('produk.detail');
+
 // Admin Routes
 Route::middleware('auth')->group(function () {
     // Profile Routes
@@ -62,9 +65,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [App\Http\Controllers\ProdukController::class, 'index'])->name('produk.index');
         Route::get('/tambah', [App\Http\Controllers\ProdukController::class, 'create'])->name('produk.create');
         Route::post('/', [App\Http\Controllers\ProdukController::class, 'store'])->name('produk.store');
-
-        // Product Detail Routes
-        Route::get('/detail/{id}', [App\Http\Controllers\ProdukDetailController::class, 'show'])->name('produk.detail');
 
         Route::get('/{id}/edit', [App\Http\Controllers\ProdukController::class, 'edit'])->name('produk.edit');
         Route::put('/{id}', [App\Http\Controllers\ProdukController::class, 'update'])->name('produk.update');

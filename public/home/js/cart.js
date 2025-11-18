@@ -57,6 +57,7 @@ class ShoppingCart {
                 jenis_id: product.jenis_id || null,
                 jenis_nama: product.jenis_nama || null,
                 stok: product.stok || product.stock || 0,
+                minBeli : product.minBeli || 1,
             });
         }
 
@@ -358,6 +359,7 @@ class ShoppingCart {
             jenis_id: null,
             jenis_nama: null,
             stok: parseInt(btn.dataset.productStok) || 0,
+            minBeli : parseInt(btn.dataset.minBeli) || 1,
         };
 
         // Get quantity from input

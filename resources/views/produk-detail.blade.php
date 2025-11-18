@@ -131,7 +131,7 @@
                                             </a>
                                         </p>
                                         <h5 class="product-info-name fw-semibold">
-                                            {{ $produk->nama }}
+                                            {{ $produk->nama }}<span id="selected-jenis-name" class="text-primary d-none"></span>
                                         </h5>
                                         <span class="body-text-3 caption text-muted">
                                             <strong class="text-success">{{ $produk->totalTerjual }}</strong>

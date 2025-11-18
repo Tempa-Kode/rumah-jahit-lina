@@ -151,7 +151,7 @@
                         </td>
                         <td data-cart-title="Jumlah" class="tf-cart-item_quantity">
                             <div class="wg-quantity">
-                                <span class="btn-quantity btn-decrease" onclick="attemptUpdateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity - 1}, ${item.stok || 0})">
+                                <span class="btn-quantity btn-decrease" onclick="attemptUpdateCartQty(${item.id}, ${item.jenis_id || null}, ${item.quantity - 1}, ${item.stok || 0})" ${item.quantity <= item.minBeli ? 'style="opacity:.6;pointer-events:none" disabled' : ''}>
                                     <i class="icon-minus"></i>
                                 </span>
                                 <input class="quantity-product" type="text" value="${item.quantity}" readonly data-stock="${item.stock || 0}">
@@ -182,7 +182,7 @@
             }
 
             // Attempt to update cart qty but check stock first
-            function attemptUpdateCartQty(productId, jenisId, quantity, stock) {
+            function attemptUpdateCartQty(productId, jenisId, quantity, stock, minBeli = 1) {
                 // fallback: if stock is not provided (0), allow update
                 const available = (typeof stock === 'number' && stock > 0) ? stock : Infinity;
                 if (quantity > available) {
