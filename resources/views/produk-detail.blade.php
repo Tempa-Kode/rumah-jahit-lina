@@ -131,7 +131,7 @@
                                             </a>
                                         </p>
                                         <h5 class="product-info-name fw-semibold">
-                                            {{ $produk->nama }}<span id="selected-jenis-name" class="text-primary"></span>
+                                            {{ $produk->nama }}
                                         </h5>
                                         <span class="body-text-3 caption text-muted">
                                             <strong class="text-success">{{ $produk->totalTerjual }}</strong>
@@ -203,7 +203,7 @@
                                                     @if ($hasDistinctNama && $jenisProdukGrouped['nama']->count() > 0)
                                                         <div class="product-color mt-3">
                                                             <p class="title body-text-3">Pilih Variasi</p>
-                                                            <div class="tf-select-color d-flex flex-wrap">
+                                                            <div class="tf-select-color d-flex flex-wrap gap-2 w-100">
                                                                 @foreach ($jenisProdukGrouped['nama'] as $namaJenis)
                                                                     @php
                                                                         // Skip jika nama sama dengan salah satu warna atau ukuran
@@ -232,7 +232,7 @@
                                                     @if ($jenisProdukGrouped['warna']->count() > 0)
                                                         <div class="product-color mt-3">
                                                             <p class="title body-text-3">Pilih Warna</p>
-                                                            <div class="tf-select-color d-flex flex-wrap">
+                                                            <div class="tf-select-color d-flex flex-wrap gap-2 w-100">
                                                                 @foreach ($jenisProdukGrouped['warna'] as $warna)
                                                                     <input type="radio"
                                                                         class="btn-check variant-radio"
@@ -254,7 +254,7 @@
                                                     @if ($jenisProdukGrouped['ukuran']->count() > 0)
                                                         <div class="product-color mt-3">
                                                             <p class="title body-text-3">Pilih Ukuran</p>
-                                                            <div class="tf-select-color d-flex flex-wrap">
+                                                            <div class="tf-select-color d-flex flex-wrap gap-2 w-100">
                                                                 @foreach ($jenisProdukGrouped['ukuran'] as $ukuran)
                                                                     <input type="radio"
                                                                         class="btn-check variant-radio"
