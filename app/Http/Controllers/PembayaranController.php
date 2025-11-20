@@ -37,7 +37,7 @@ class PembayaranController extends Controller
                     $params = [
                         'transaction_details' => [
                             'order_id' => $invoice->kode_invoice,
-                            'gross_amount' => $request->total_bayar,
+                            'gross_amount' => (int) $request->total_bayar,
                         ],
                         'customer_details' => [
                             'first_name' => Auth::user()->nama,

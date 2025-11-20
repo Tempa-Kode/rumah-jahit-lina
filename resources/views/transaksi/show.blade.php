@@ -217,6 +217,9 @@
                             </label>
                             <input type="text" class="form-control radius-8" name="resi"
                                 value="{{ $transaksi->resi }}" placeholder="Masukkan nomor resi">
+                            @error('resi')
+                                <div class="text-danger text-sm mt-1 fst-italic">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold text-primary-light text-sm mb-8">
@@ -224,11 +227,9 @@
                             </label>
                             <select class="form-select radius-8" name="status_pengiriman" required>
                                 <option value="">Pilih Status</option>
-                                @if ($transaksi->status_pengiriman == "pending")
-                                    <option value="dikirim"
-                                        {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
-                                        Sudah Dikirim</option>
-                                @endif
+                                <option value="dikirim"
+                                    {{ $transaksi->status_pengiriman === "dikirim" ? "selected" : "" }}>
+                                    Sudah Dikirim</option>
                                 <option value="dibatalkan"
                                     {{ $transaksi->status_pengiriman === "dibatalkan" ? "selected" : "" }}>
                                     Dibatalkan</option>

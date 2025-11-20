@@ -306,6 +306,7 @@
                                                         data-product-stok="{{ $initialStock }}"
                                                         data-min-beli="{{ $produk->min_beli ?? 1 }}"
                                                         data-product-jumlah="{{ $produk->jumlah_produk ?? 0 }}"
+                                                        onclick="minPembelian()"
                                                         >
                                                         Beli Sekarang
                                                     </button>

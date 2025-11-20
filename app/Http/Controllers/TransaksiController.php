@@ -127,6 +127,10 @@ class TransaksiController extends Controller
             'status_pengiriman' => 'required|in:pending,dikirim,diterima,dibatalkan',
         ]);
 
+        if($validated['status_pengiriman'] === 'dikirim' && empty($validated['resi'])) {
+            return redirect()->back()->withErrors(['resi' => 'Nomor resi harus diisi saat status pengiriman diubah menjadi "dikirim".'])->withInput();
+        }
+
         $transaksi->update($validated);
 
         return redirect()->back()->with('success', 'Informasi pengiriman berhasil diupdate!');
