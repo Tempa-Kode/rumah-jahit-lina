@@ -60,6 +60,7 @@ class ProdukController extends Controller
                 'kategori_id' => $validated['kategori_id'],
                 'nama' => $validated['nama'],
                 'harga' => $validated['harga'],
+                'jumlah_produk' => $validated['jumlah_produk'] ?? 0,
                 'keterangan' => $validated['keterangan'] ?? null,
                 'min_beli' => $validated['min_beli'] ?? null,
             ]);
